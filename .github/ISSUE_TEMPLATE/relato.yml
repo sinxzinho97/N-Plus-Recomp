@@ -1,0 +1,45 @@
+name: Erro ou resultado de compatibilidade
+description: Relate um erro na criação, uma falha durante o jogo ou um resultado em outro aparelho.
+title: "[Relato] "
+body:
+  - type: markdown
+    attributes:
+      value: "A issue será pública. Revise os anexos. Não envie chaves, backups de assinatura, jogos, firmware ou saves. [Como exportar o diagnóstico](https://github.com/sinxzinho97/N-Plus-Recomp/blob/main/docs/DIAGNOSTICOS.md)."
+  - type: dropdown
+    id: tipo
+    attributes:
+      label: O que você testou?
+      options:
+        - Criação, atualização ou instalação do APK
+        - Travamento ou fechamento do jogo
+        - Gráficos, desempenho ou controles
+        - Resultado positivo de compatibilidade
+        - Outro
+    validations:
+      required: true
+  - type: input
+    id: versoes
+    attributes:
+      label: Jogo, versão do jogo e versão do criador
+      placeholder: "Exemplo: Tears of the Kingdom 1.4.3, N+ Recomp 3.0.11 para Windows"
+    validations:
+      required: true
+  - type: textarea
+    id: aparelho
+    attributes:
+      label: Aparelho e driver
+      description: "Informe modelo, Android, processador/GPU se souber e nome/versão do driver. Para uma falha no PC, informe o Windows."
+    validations:
+      required: true
+  - type: textarea
+    id: relato
+    attributes:
+      label: O que aconteceu?
+      description: "Descreva a etapa, a área do jogo, as configurações ou mods, o resultado e como repetir. Em um teste positivo, diga por quanto tempo jogou."
+    validations:
+      required: true
+  - type: textarea
+    id: diagnostico
+    attributes:
+      label: Diagnóstico ou captura revisada (opcional)
+      description: "Anexe o ZIP de diagnóstico do jogo, uma captura da etapa do criador ou cole o trecho do log que mostra o erro."

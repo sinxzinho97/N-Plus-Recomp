@@ -1,0 +1,15 @@
+N+ Turnip V6 (Mesa 26.3.0) - Driver Vulkan para Android ARM64 (Adreno 6xx/7xx/8xx)
+
+O que muda no V6 (baseado nos testes em BOTW, TOTK, PKM Z-A, Silksong, Hades II e Link's Awakening):
+1. Mantém 100% do ganho de desempenho do V5 na Adreno 830 / 825 (has_fs_tex_prefetch ativo,
+   sem flushes forçados em dynamic render passes e sem injeção artificial de flag AHB).
+2. Restaura exclusivamente o reset leve do registrador de profundidade LRZ ao final de passes
+   GMEM na Adreno 8xx (tu_lrz.cc: tu6_write_lrz_cntl<CHIP>(cmd, cs, {})), com custo zero de FPS,
+   para eliminar piscadas e glitches visuais intermitentes de profundidade/oclusão em jogos
+   com muitos passes por frame como Zelda: Tears of the Kingdom.
+3. Mantém compatibilidade Android 10+ (API 29), suporte universal a IMapper5/UBWC,
+   recuperação de layout de display para S25 Ultra / Adreno 830 e alinhamento de 16 KiB.
+
+Como instalar no N+ Recomp:
+- Abra o jogo -> Menu de pausa -> Gráficos -> Driver Vulkan -> Importar ZIP -> selecione n-plus-turnip-V6.zip.
+- Feche e abra o jogo novamente. Na 1ª abertura o cache de shaders será reconstruído; da 2ª em diante o jogo roda liso.

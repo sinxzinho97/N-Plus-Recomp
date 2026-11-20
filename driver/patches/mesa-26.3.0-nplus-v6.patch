@@ -1,0 +1,1214 @@
+--- a/src/freedreno/common/freedreno_dev_info.h
++++ b/src/freedreno/common/freedreno_dev_info.h
+@@ -472,6 +472,9 @@
+       /* Whether the device supports the image processing opcode */
+       bool has_image_processing;
+ 
++      /* If GMEM needs to be disabled for this GPU */
++      bool disable_gmem;
++
+       /* The amount of valid draw state IDs. */
+       uint32_t max_draw_states;
+ 
+--- a/src/freedreno/common/freedreno_devices.py
++++ b/src/freedreno/common/freedreno_devices.py
+@@ -838,7 +838,7 @@
+         has_ray_intersection = True,
+         has_hw_bin_scaling = True,
+         has_image_processing = True,
+-        has_64b_image_atomics = True,
++        has_64b_image_atomics = False,
+         has_implicit_fragface_fragcoord_ij_linear = True,
+ 
+         QCTDD08901551 = True,
+@@ -871,7 +871,7 @@
+         has_hw_bin_scaling = True,
+         has_image_processing = True,
+         max_draw_states = 64,
+-        has_64b_image_atomics = True,
++        has_64b_image_atomics = False,
+         has_implicit_fragface_fragcoord_ij_linear = True,
+         subpass_fence_cleans_resolve = True,
+ 
+@@ -1429,6 +1429,7 @@
+         [A6XXRegs.REG_A6XX_RB_UNKNOWN_881D,   0x00000000],
+         [A6XXRegs.REG_A6XX_RB_UNKNOWN_881E,   0x00000000],
+         [A6XXRegs.REG_A7XX_RB_LRZ_CNTL2,      0x00000000],
++        [A6XXRegs.REG_A8XX_RB_RESOLVE_CR_CNTL, 0x00000001],
+         [A6XXRegs.REG_A8XX_RB_RESOLVE_CNTL_5, 0x00000001],
+ 
+         [A6XXRegs.REG_A7XX_SP_UNKNOWN_AB01,   0x00000000],
+@@ -1484,6 +1485,7 @@
+ )
+ 
+ add_gpus([
++       GPUId(chip_id=0x44010000, name="Adreno (TM) 810"), # KGSL
+        GPUId(chip_id=0xffff44010000, name="Adreno (TM) 810"),
+     ], A6xxGPUInfo(
+         CHIP.A8XX,
+@@ -1491,9 +1493,8 @@
+             gmem_vpc_attr_buf_size = 16384,
+             gmem_vpc_pos_buf_size = 12288,
+             gmem_vpc_bv_pos_buf_size = 20480,
+-            # This is possibly also needed for a830 (and all of a8xx),
+-            # move to a8xx_base if confirmed needed for a830.
+             has_fs_tex_prefetch = False,
++            disable_gmem = True,
+         )],
+         num_ccu = 1,
+         num_slices = 1,
+@@ -1509,12 +1510,34 @@
+     ))
+ 
+ add_gpus([
++        GPUId(chip_id=0x44030000, name="Adreno (TM) 825"), # KGSL
++    ], A6xxGPUInfo(
++        CHIP.A8XX,
++        [a7xx_base, a7xx_gen3, a8xx_base, a8xx_gen1, GPUProps(
++            sysmem_ccu_depth_cache_fraction = CCUColorCacheFraction.THREE_QUARTER.value,
++            sysmem_per_ccu_depth_cache_size = 96 * 1024,
++        )],
++        num_ccu = 4,
++        num_slices = 2,
++        tile_align_w = 96,
++        tile_align_h = 32,
++        tile_max_w = 16416,
++        tile_max_h = 16384,
++        num_vsc_pipes = 32,
++        cs_shared_mem_size = 32 * 1024,
++        wave_granularity = 2,
++        fibers_per_sp = 128 * 2 * 16,
++        raw_magic_regs = a8xx_base_raw_magic_regs,
++    ))
++
++add_gpus([
++        GPUId(chip_id=0x44050000, name="Adreno (TM) 830"), # KGSL
+         GPUId(chip_id=0xffff44050000, name="Adreno (TM) 830"),
+         GPUId(chip_id=0xffff44050001, name="Adreno (TM) 830v1"),
+         GPUId(chip_id=0x44050001, name="Adreno (TM) 830"), # KGSL
+     ], A6xxGPUInfo(
+         CHIP.A8XX,
+         [a7xx_base, a7xx_gen3, a8xx_base, a8xx_gen1],
+         num_ccu = 6,
+         num_slices = 3,
+         tile_align_w = 96,
+@@ -1529,6 +1552,8 @@
+     ))
+ 
+ add_gpus([
++        GPUId(chip_id=0x44030A00, name="Adreno (TM) 829"), # KGSL
++        GPUId(chip_id=0xffff44030A00, name="Adreno (TM) 829"),
+         GPUId(chip_id=0x44030a20, name="Adreno (TM) 829"), # KGSL
+     ], A6xxGPUInfo(
+         CHIP.A8XX,
+@@ -1536,6 +1561,7 @@
+          GPUProps(
+             shading_rate_matches_vk = True,  # TODO confirm this
+             sysmem_vpc_bv_pos_buf_size = 24576,
++            disable_gmem = True,
+          )],
+         num_ccu = 4,
+         num_slices = 2,
+@@ -1551,6 +1577,8 @@
+     ))
+ 
+ add_gpus([
++        GPUId(chip_id=0x44041430, name="Adreno (TM) 845"), # KGSL
++        GPUId(chip_id=0x44051431, name="Adreno (TM) 850"), # KGSL
+         GPUId(chip_id=0xffff44050A31, name="Adreno (TM) 840"),
+     ], A6xxGPUInfo(
+         CHIP.A8XX,
+--- a/src/freedreno/vulkan/tu_cmd_buffer.cc
++++ b/src/freedreno/vulkan/tu_cmd_buffer.cc
+@@ -1425,6 +1425,11 @@
+       return true;
+    }
+ 
++   if (cmd->device->physical_device->dev_info.props.disable_gmem) {
++      cmd->state.rp.force_render_mode_reason = "Unsupported GPU";
++      return true;
++   }
++
+    /* can't fit attachments into gmem */
+    if (!cmd->state.tiling->possible) {
+       cmd->state.rp.force_render_mode_reason = "Can't fit attachments into gmem";
+--- a/src/freedreno/vulkan/tu_device.cc
++++ b/src/freedreno/vulkan/tu_device.cc
+@@ -1018,7 +1018,7 @@
+             "turnip Mesa driver");
+    memset(p->driverInfo, 0, sizeof(p->driverInfo));
+    snprintf(p->driverInfo, VK_MAX_DRIVER_INFO_SIZE,
+-            "Mesa " PACKAGE_VERSION MESA_GIT_SHA1);
++            "Mesa " PACKAGE_VERSION MESA_GIT_SHA1 " / N+ Turnip V6");
+    p->conformanceVersion = (VkConformanceVersion) {
+       .major = 1,
+       .minor = 4,
+--- a/src/freedreno/vulkan/tu_image.h
++++ b/src/freedreno/vulkan/tu_image.h
+@@ -20,6 +20,10 @@
+ struct tu_image
+ {
+    struct vk_image vk;
++#ifdef VK_USE_PLATFORM_ANDROID_KHR
++   /* The deferred Android create info replaces the original tiling. */
++   bool recover_anb_display_layout;
++#endif
+ 
+    struct fdl_layout layout[3];
+    uint64_t subsampled_metadata_offset;
+--- a/src/freedreno/vulkan/tu_image.cc
++++ b/src/freedreno/vulkan/tu_image.cc
+@@ -32,6 +32,10 @@
+ #include "tu_rmv.h"
+ #include "tu_subsampled_image.h"
+ #include "tu_wsi.h"
++
++#ifdef VK_USE_PLATFORM_ANDROID_KHR
++#include "tu_android_display.inc"
++#endif
+ 
+ uint32_t
+ tu6_plane_count(VkFormat format)
+@@ -723,7 +727,7 @@
+     */
+    bool force_ubwc = false;
+    if (modifier == DRM_FORMAT_MOD_QCOM_COMPRESSED) {
+-      assert(!force_linear_tile);
++      tile_mode = TILE6_3;
+       ubwc_enabled = true;
+       force_ubwc = true;
+    }
+@@ -901,6 +905,9 @@
+    if (result != VK_SUCCESS)
+       return result;
+ 
++   if (img->recover_anb_display_layout)
++      recover_display_modifier(dev, img->vk.android_deferred_create_info, eci);
++
+    VkExternalMemoryImageCreateInfo external_info = {
+       .sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO,
+       .pNext = img->vk.android_deferred_create_info->pNext,
+@@ -951,6 +958,10 @@
+ 
+    if (vk_image_is_android_native_buffer_alias(&image->vk) ||
+        vk_image_is_android_hardware_buffer(&image->vk)) {
++#ifdef VK_USE_PLATFORM_ANDROID_KHR
++      image->recover_anb_display_layout = vk_image_is_android_native_buffer_alias(&image->vk) &&
++                                          uses_recomp_display_layout(pCreateInfo);
++#endif
+       result = vk_android_init_deferred_image(&device->vk, &image->vk,
+                                               pCreateInfo, alloc);
+       if (result != VK_SUCCESS) {
+@@ -1010,6 +1021,10 @@
+       if (result != VK_SUCCESS)
+          goto fail;
+ 
++#ifdef VK_USE_PLATFORM_ANDROID_KHR
++      if (uses_recomp_display_layout(pCreateInfo))
++         recover_display_modifier(device, pCreateInfo, eci);
++#endif
+       plane_layouts = a_plane_layouts;
+       modifier = eci.drmFormatModifier;
+    }
+--- /dev/null
++++ b/src/freedreno/vulkan/tu_android_display.inc
+@@ -0,0 +0,246 @@
++/* SPDX-License-Identifier: MIT
++ * Private to the Turnip Android WSI code. This build uses the NDK only.
++ */
++#include <android/hardware_buffer.h>
++#include <dlfcn.h>
++#include "tu_knl.h"
++#include "util/log.h"
++#include "util/u_gralloc/u_gralloc.h"
++
++namespace {
++/* Public prefix of the frozen Android graphics mapper stable-C v5 ABI:
++ * hardware/interfaces/graphics/mapper/stable-c/include/android/hardware/graphics/mapper/IMapper.h.
++ * The NDK sysroot omits this platform header. No vendor handle fields are used.
++ */
++struct mapper_v5_prefix {
++   alignas(max_align_t) uint32_t version;
++   int32_t (*import_buffer)(const native_handle_t *, buffer_handle_t *);
++   int32_t (*free_buffer)(buffer_handle_t);
++   void (*get_transport_size)();
++   void (*lock)();
++   void (*unlock)();
++   void (*flush_locked_buffer)();
++   void (*reread_locked_buffer)();
++   void (*get_metadata)();
++   int32_t (*get_standard_metadata)(buffer_handle_t, int64_t, void *, size_t);
++};
++
++const mapper_v5_prefix *
++load_display_mapper()
++{
++   void *binder = dlopen("libbinder_ndk.so", RTLD_NOW | RTLD_LOCAL);
++   if (!binder)
++      return nullptr;
++
++   using visit_fn = void (*)(const char *, void *, void (*)(const char *, void *));
++   using open_fn = void *(*)(const char *, const char *, int);
++   auto visit = reinterpret_cast<visit_fn>(dlsym(binder, "AServiceManager_forEachDeclaredInstance"));
++   auto open = reinterpret_cast<open_fn>(dlsym(binder, "AServiceManager_openDeclaredPassthroughHal"));
++   struct instance_info {
++      char name[128] = {};
++      unsigned count = 0;
++   } instance;
++   if (visit && open) {
++      visit("mapper", &instance, [](const char *name, void *ctx) {
++         auto *info = static_cast<instance_info *>(ctx);
++         info->count++;
++         if (info->count == 1 && name && strlen(name) < sizeof(info->name))
++            memcpy(info->name, name, strlen(name) + 1);
++      });
++   }
++
++   /* Ask Android to open only a single, already loaded, declared HAL. */
++   void *module = instance.count == 1 && instance.name[0]
++      ? open("mapper", instance.name, RTLD_NOLOAD | RTLD_NOW | RTLD_LOCAL) : nullptr;
++   dlclose(binder);
++   if (!module)
++      return nullptr;
++
++   using load_fn = int32_t (*)(const mapper_v5_prefix **);
++   auto load = reinterpret_cast<load_fn>(dlsym(module, "AIMapper_loadIMapper"));
++   const mapper_v5_prefix *mapper = nullptr;
++   if (!load || load(&mapper) != 0 || !mapper || mapper->version < 5 ||
++       !mapper->import_buffer || !mapper->free_buffer || !mapper->get_standard_metadata) {
++      dlclose(module);
++      return nullptr;
++   }
++   /* The function table belongs to the HAL. Keep this reference for its lifetime. */
++   return mapper;
++}
++
++/* AOSP standard metadata encoding. Every field is packed without padding.
++ * Only fixed-size responses for this single-plane RGBA surface are accepted.
++ */
++struct metadata_reader {
++   uint8_t bytes[1024];
++   size_t pos = 0, size = 0;
++
++   bool word(uint64_t &out) {
++      if (size - pos < sizeof(out))
++         return false;
++      memcpy(&out, bytes + pos, sizeof(out));
++      pos += sizeof(out);
++      return true;
++   }
++
++   bool label(const char *expected = nullptr) {
++      uint64_t len;
++      if (!word(len) || len > size - pos ||
++          (expected && (len != strlen(expected) || memcmp(bytes + pos, expected, len))))
++         return false;
++      pos += len;
++      return true;
++   }
++
++   bool fetch(const mapper_v5_prefix *mapper, buffer_handle_t h, int64_t type) {
++      int32_t n = mapper->get_standard_metadata(h, type, bytes, sizeof(bytes));
++      if (n <= 0 || (size_t)n > sizeof(bytes))
++         return false;
++      pos = 0;
++      size = n;
++      uint64_t actual_type;
++      return label("android.hardware.graphics.common.StandardMetadataType") &&
++             word(actual_type) && actual_type == (uint64_t)type;
++   }
++};
++
++struct plane_info {
++   uint64_t offset, pitch;
++};
++
++bool
++read_plane(metadata_reader &r, plane_info &p)
++{
++   uint64_t count, ignored;
++   if (!r.word(count) || count > 16)
++      return false;
++   for (unsigned i = 0; i < count; ++i) {
++      if (!r.label() || !r.word(ignored) || !r.word(ignored) || !r.word(ignored))
++         return false;
++   }
++   return r.word(p.offset) && r.word(ignored) && r.word(p.pitch) &&
++          r.word(ignored) && r.word(ignored) && r.word(ignored) &&
++          r.word(ignored) && r.word(ignored);
++}
++
++uint64_t
++read_display_modifier(const mapper_v5_prefix *mapper, buffer_handle_t handle,
++                      const tu_device *dev, const VkImageCreateInfo *ci, uint32_t pitch)
++{
++   constexpr int64_t pixel_format_modifier = 8, allocation_size = 10,
++                     compression = 12, plane_layouts = 15;
++   metadata_reader r;
++   uint64_t modifier, bytes, value, plane_count;
++   if (!r.fetch(mapper, handle, pixel_format_modifier) || !r.word(modifier) || r.pos != r.size ||
++       !r.fetch(mapper, handle, allocation_size) || !r.word(bytes) || r.pos != r.size ||
++       !r.fetch(mapper, handle, compression))
++      return DRM_FORMAT_MOD_INVALID;
++
++   /* Qualcomm declares the (namespace, value) pair in QtiGralloc.h and
++    * QtiGrallocMetadata.h. Unknown compression types do not imply UBWC.
++    */
++   size_t payload = r.pos;
++   bool compressed = r.label("QTI") && r.word(value) && value == 20001 && r.pos == r.size;
++   if (compressed) {
++      /* Some QTI mappers use zero as a placeholder even for UBWC. Only
++       * accept it if both plane geometries below exactly match Mesa's FDL. */
++      if (modifier != DRM_FORMAT_MOD_QCOM_COMPRESSED && modifier != DRM_FORMAT_MOD_INVALID &&
++          modifier != DRM_FORMAT_MOD_LINEAR)
++         return DRM_FORMAT_MOD_INVALID;
++   } else {
++      r.pos = payload;
++      if (!r.label("android.hardware.graphics.common.Compression") ||
++          !r.word(value) || value != 0 || r.pos != r.size || modifier != DRM_FORMAT_MOD_LINEAR)
++         return DRM_FORMAT_MOD_INVALID;
++   }
++   if (!r.fetch(mapper, handle, plane_layouts) || !r.word(plane_count) ||
++       plane_count != (compressed ? 2u : 1u))
++      return DRM_FORMAT_MOD_INVALID;
++   plane_info planes[2];
++   for (unsigned i = 0; i < plane_count; ++i)
++      if (!read_plane(r, planes[i]))
++         return DRM_FORMAT_MOD_INVALID;
++   if (r.pos != r.size || pitch < uint64_t(ci->extent.width) * 4)
++      return DRM_FORMAT_MOD_INVALID;
++
++   struct fdl_layout layout = {};
++   const struct fdl_explicit_layout storage = { .offset = 0, .pitch = pitch };
++   struct fdl_image_params params = {};
++   params.format = vk_format_to_pipe_format(ci->format);
++   params.nr_samples = params.depth0 = params.mip_levels = params.array_size = 1;
++   params.width0 = ci->extent.width;
++   params.height0 = ci->extent.height;
++   params.tile_mode = compressed ? TILE6_3 : TILE6_LINEAR;
++   params.ubwc = params.force_ubwc = compressed;
++   if (!fdl6_layout_image(&layout, &dev->physical_device->dev_info, &params, &storage) ||
++       layout.size > bytes || layout.ubwc != compressed)
++      return DRM_FORMAT_MOD_INVALID;
++
++   /* Accept exactly the row pitch and byte offsets that Turnip will use.
++    * Vendors may expose the metadata plane before or after the color plane.
++    */
++   unsigned color = compressed && planes[0].offset == 0 ? 1 : 0;
++   if (planes[color].offset != layout.slices[0].offset || planes[color].pitch != fdl_pitch(&layout, 0))
++      return DRM_FORMAT_MOD_INVALID;
++   if (compressed && (!planes[color].offset || planes[1 - color].offset != 0 ||
++                      planes[1 - color].offset != layout.ubwc_slices[0].offset ||
++                      planes[1 - color].pitch != fdl_ubwc_pitch(&layout, 0)))
++      return DRM_FORMAT_MOD_INVALID;
++   return compressed ? DRM_FORMAT_MOD_QCOM_COMPRESSED : DRM_FORMAT_MOD_LINEAR;
++}
++
++bool
++uses_recomp_display_layout(const VkImageCreateInfo *ci)
++{
++   const VkImageCompressionControlEXT *control =
++      vk_find_struct_const(ci->pNext, IMAGE_COMPRESSION_CONTROL_EXT);
++   return ci->tiling == VK_IMAGE_TILING_OPTIMAL && ci->flags == 0 &&
++          ci->usage == (VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT) &&
++          (!control || control->flags == VK_IMAGE_COMPRESSION_DEFAULT_EXT) &&
++          !vk_find_struct_const(ci->pNext, IMAGE_DRM_FORMAT_MODIFIER_EXPLICIT_CREATE_INFO_EXT) &&
++          !vk_find_struct_const(ci->pNext, IMAGE_DRM_FORMAT_MODIFIER_LIST_CREATE_INFO_EXT) &&
++          !vk_find_struct_const(ci->pNext, IMAGE_CREATE_FLAGS_2_CREATE_INFO_KHR) &&
++          !vk_find_struct_const(ci->pNext, IMAGE_USAGE_FLAGS_2_CREATE_INFO_KHR);
++}
++
++void
++recover_display_modifier(const tu_device *dev, const VkImageCreateInfo *ci,
++                         VkImageDrmFormatModifierExplicitCreateInfoEXT &eci)
++{
++   const tu_physical_device *gpu = dev->physical_device;
++   if (eci.drmFormatModifier != DRM_FORMAT_MOD_INVALID ||
++       (uint32_t(gpu->dev_id.chip_id) != 0x44050000 && uint32_t(gpu->dev_id.chip_id) != 0x44050001) ||
++       strcmp(gpu->instance->knl->name, "kgsl") != 0 ||
++       (ci->format != VK_FORMAT_R8G8B8A8_UNORM && ci->format != VK_FORMAT_R8G8B8A8_SRGB) ||
++       ci->imageType != VK_IMAGE_TYPE_2D || ci->mipLevels != 1 || ci->arrayLayers != 1 ||
++       ci->samples != VK_SAMPLE_COUNT_1_BIT || ci->extent.depth != 1 ||
++       eci.drmFormatModifierPlaneCount != 1 || eci.pPlaneLayouts[0].offset ||
++       !eci.pPlaneLayouts[0].rowPitch || eci.pPlaneLayouts[0].rowPitch > UINT32_MAX ||
++       u_gralloc_get_type(vk_android_get_ugralloc()) != U_GRALLOC_TYPE_FALLBACK)
++      return;
++
++   const VkNativeBufferANDROID *anb = vk_find_struct_const(ci->pNext, NATIVE_BUFFER_ANDROID);
++   if (!anb || !anb->handle ||
++       (anb->format != AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM &&
++        anb->format != AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM))
++      return;
++   static const mapper_v5_prefix *mapper = load_display_mapper();
++   if (!mapper)
++      return;
++   buffer_handle_t imported = nullptr;
++   if (mapper->import_buffer(anb->handle, &imported) != 0 || !imported)
++      return;
++   uint64_t recovered = read_display_modifier(mapper, imported, dev, ci, eci.pPlaneLayouts[0].rowPitch);
++   mapper->free_buffer(imported);
++   if (recovered != DRM_FORMAT_MOD_INVALID) {
++      eci.drmFormatModifier = recovered;
++      /* Each confirmed layout gets a single diagnostic per process. */
++      static int reported[2] = {};
++      const bool ubwc = recovered == DRM_FORMAT_MOD_QCOM_COMPRESSED;
++      int *once = &reported[ubwc ? 1 : 0];
++      if (p_atomic_cmpxchg(once, 0, 1) == 0)
++         mesa_logi("N+ Turnip V6: IMapper5 confirmed RGBA display buffer layout %s",
++                   ubwc ? "UBWC" : "LINEAR");
++   }
++}
++} /* anonymous namespace */
+--- a/src/freedreno/vulkan/tu_lrz.cc
++++ b/src/freedreno/vulkan/tu_lrz.cc
+@@ -929,6 +929,9 @@
+    } else {
+       tu_emit_event_write<CHIP>(cmd, cs, FD_LRZ_FLUSH);
+    }
++
++   if (CHIP >= A8XX)
++      tu6_write_lrz_cntl<CHIP>(cmd, cs, {});
+ }
+ TU_GENX(tu_lrz_tiling_end);
+ 
+--- a/src/freedreno/vulkan/tu_pipeline.cc
++++ b/src/freedreno/vulkan/tu_pipeline.cc
+@@ -3304,7 +3304,7 @@
+ {
+    unsigned num_rts = alpha_to_coverage_enable ?
+       MAX2(cb->attachment_count, 1) : cb->attachment_count;
+-   return 8 + 5 * num_rts;
++   return 8 + (CHIP >= A8XX ? 2 : 0) + 5 * num_rts;
+ }
+ 
+ template <chip CHIP>
+@@ -3373,6 +3373,7 @@
+                                           .sample_mask = sample_mask));
+ 
+    unsigned num_remapped_rts = 0;
++   uint32_t lrz_color_comp_mask = 0;
+    for (unsigned i = 0; i < num_rts; i++) {
+       if (cal->color_map[i] == MESA_VK_ATTACHMENT_UNUSED)
+          continue;
+@@ -3380,6 +3381,8 @@
+       num_remapped_rts = MAX2(num_remapped_rts, remapped_idx + 1);
+       const struct vk_color_blend_attachment_state *att = &cb->attachments[i];
+       if ((cb->color_write_enables & (1u << i)) && i < cb->attachment_count) {
++         if (CHIP >= A8XX && remapped_idx < 8)
++            lrz_color_comp_mask |= (att->write_mask & 0xf) << (remapped_idx * 4);
+          const enum a3xx_rb_blend_opcode color_op = tu6_blend_op(att->color_blend_op);
+          const enum adreno_rb_blend_factor src_color_factor =
+             tu6_blend_factor(static_cast<VkBlendFactor>(att->src_color_blend_factor));
+@@ -3432,6 +3435,8 @@
+    }
+    tu_cs_emit_regs(cs, A6XX_SP_PS_MRT_CNTL(.mrt = num_remapped_rts));
+    tu_cs_emit_regs(cs, A6XX_RB_PS_MRT_CNTL(.mrt = num_remapped_rts));
++   if (CHIP >= A8XX)
++      tu_cs_emit_regs(cs, GRAS_LRZ_COLOR_COMP_MASK(CHIP, .dword = lrz_color_comp_mask));
+ }
+ 
+ static const enum mesa_vk_dynamic_graphics_state tu_blend_constants_state[] = {
+--- a/src/util/u_gralloc/meson.build
++++ b/src/util/u_gralloc/meson.build
+@@ -15,6 +15,7 @@
+   'u_gralloc_cros_api.c',
+   'u_gralloc_libdrm.c',
+   'u_gralloc_qcom.c',
++  'u_gralloc_aimapper.c',
+ )
+ 
+ if dep_android_ui.found()
+--- a/src/util/u_gralloc/u_gralloc.c
++++ b/src/util/u_gralloc/u_gralloc.c
+@@ -28,6 +28,7 @@
+ #ifdef USE_IMAPPER4_METADATA_API
+    {.type = U_GRALLOC_TYPE_GRALLOC4, .create = u_gralloc_imapper_api_create},
+ #endif /* USE_IMAPPER4_METADATA_API */
++   {.type = U_GRALLOC_TYPE_AIMAPPER, .create = u_gralloc_aimapper_create},
+    {.type = U_GRALLOC_TYPE_LIBDRM, .create = u_gralloc_libdrm_create},
+    {.type = U_GRALLOC_TYPE_QCOM, .create = u_gralloc_qcom_create},
+    {.type = U_GRALLOC_TYPE_FALLBACK, .create = u_gralloc_fallback_create},
+--- a/src/util/u_gralloc/u_gralloc.h
++++ b/src/util/u_gralloc/u_gralloc.h
+@@ -54,6 +54,7 @@
+ enum u_gralloc_type {
+    U_GRALLOC_TYPE_AUTO,
+    U_GRALLOC_TYPE_GRALLOC4,
++   U_GRALLOC_TYPE_AIMAPPER,
+    U_GRALLOC_TYPE_CROS,
+    U_GRALLOC_TYPE_LIBDRM,
+    U_GRALLOC_TYPE_QCOM,
+--- /dev/null
++++ b/src/util/u_gralloc/u_gralloc_aimapper.c
+@@ -0,0 +0,647 @@
++/*
++ * Mesa 3-D graphics library
++ * SPDX-License-Identifier: MIT
++ */
++
++/*
++ * IMapper5 stable-C backend, reached via Android's NDK passthrough loader
++ * (libbinder_ndk.so) or the SP-HAL loader (libvndksupport.so).
++ *
++ * Adapted from Leb-Sun's u_gralloc_aimapper backend for Mesa builds with
++ * -Dandroid-stub=true, hardened for Samsung One UI / Android 15-16 SELinux
++ * policies, raw/unimported handles, and both QTI UBWC plane orderings.
++ */
++
++#include <dirent.h>
++#include <dlfcn.h>
++#include <errno.h>
++#include <inttypes.h>
++#include <stdalign.h>
++#include <stddef.h>
++#include <stdint.h>
++#include <string.h>
++
++#include "drm-uapi/drm_fourcc.h"
++#include "util/log.h"
++#include "util/macros.h"
++#include "util/u_atomic.h"
++#include "util/u_memory.h"
++
++#include "u_gralloc_internal.h"
++
++typedef struct AIMapperV5 {
++   int32_t (*importBuffer)(const native_handle_t *handle,
++                           const native_handle_t **outBufferHandle);
++   int32_t (*freeBuffer)(const native_handle_t *buffer);
++   void *getTransportSize;
++   void *lock;
++   void *unlock;
++   void *flushLockedBuffer;
++   void *rereadLockedBuffer;
++   void *getMetadata;
++   int32_t (*getStandardMetadata)(const native_handle_t *buffer,
++                                  int64_t standardMetadataType, void *destBuffer,
++                                  size_t destBufferSize);
++   void *setMetadata;
++   void *setStandardMetadata;
++   void *listSupportedMetadataTypes;
++   void *dumpBuffer;
++   void *dumpAllBuffers;
++   void *getReservedRegion;
++} AIMapperV5;
++
++typedef struct AIMapper {
++   alignas(alignof(max_align_t)) uint32_t version;
++   AIMapperV5 v5;
++} AIMapper;
++
++#define AIMAPPER_VERSION_5 5
++
++/* StandardMetadataType.aidl */
++#define SMT_LAYER_COUNT           5
++#define SMT_PIXEL_FORMAT_FOURCC   7
++#define SMT_PIXEL_FORMAT_MODIFIER 8
++#define SMT_ALLOCATION_SIZE       10
++#define SMT_COMPRESSION           12
++#define SMT_CHROMA_SITING         14
++#define SMT_PLANE_LAYOUTS         15
++#define SMT_DATASPACE             17
++
++/* Dataspace bit fields */
++#define DS_STANDARD_MASK      (63u << 16)
++#define DS_STANDARD_BT709     (1u << 16)
++#define DS_STANDARD_BT2020    (6u << 16)
++#define DS_STANDARD_BT2020_CL (7u << 16)
++#define DS_RANGE_MASK         (7u << 27)
++#define DS_RANGE_FULL         (1u << 27)
++
++/* ChromaSiting.aidl */
++#define CHROMA_SITING_COSITED_HORIZONTAL 3
++#define CHROMA_SITING_COSITED_VERTICAL   4
++#define CHROMA_SITING_COSITED_BOTH       5
++
++struct aimapper_gralloc {
++   struct u_gralloc base;
++   void *mapper_lib;
++   AIMapper *mapper;
++};
++
++struct md_reader {
++   const uint8_t *p;
++   const uint8_t *end;
++   bool ok;
++};
++
++static bool
++md_take(struct md_reader *r, void *dst, size_t n)
++{
++   if (!r->ok || (size_t)(r->end - r->p) < n) {
++      r->ok = false;
++      return false;
++   }
++   if (dst)
++      memcpy(dst, r->p, n);
++   r->p += n;
++   return true;
++}
++
++static int64_t
++md_i64(struct md_reader *r)
++{
++   int64_t v = 0;
++   md_take(r, &v, sizeof(v));
++   return v;
++}
++
++static void
++md_take_str(struct md_reader *r, char *out, size_t out_size)
++{
++   int64_t len = md_i64(r);
++   if (len < 0 || len > (r->end - r->p)) {
++      r->ok = false;
++      if (out_size)
++         out[0] = '\0';
++      return;
++   }
++   size_t copy = (size_t)len < out_size - 1 ? (size_t)len : out_size - 1;
++   if (out_size) {
++      memcpy(out, r->p, copy);
++      out[copy] = '\0';
++   }
++   md_take(r, NULL, (size_t)len);
++}
++
++static void
++md_skip_str(struct md_reader *r)
++{
++   int64_t len = md_i64(r);
++   if (len < 0 || len > (r->end - r->p)) {
++      r->ok = false;
++      return;
++   }
++   md_take(r, NULL, (size_t)len);
++}
++
++static bool
++md_header(struct md_reader *r, int64_t expect_type)
++{
++   md_skip_str(r);
++   return r->ok && md_i64(r) == expect_type && r->ok;
++}
++
++static int32_t
++md_fetch(struct aimapper_gralloc *gr, const native_handle_t *handle,
++         int64_t type, void *buf, size_t buf_size)
++{
++   int32_t n = gr->mapper->v5.getStandardMetadata(handle, type, buf, buf_size);
++   if (n < 0 || (size_t)n > buf_size)
++      return -1;
++   return n;
++}
++
++static bool
++md_scalar(struct aimapper_gralloc *gr, const native_handle_t *handle,
++          int64_t type, void *out, size_t out_size)
++{
++   uint8_t buf[160];
++   int32_t n = md_fetch(gr, handle, type, buf, sizeof(buf));
++   if (n < 0)
++      return false;
++
++   struct md_reader r = {buf, buf + n, true};
++   if (!md_header(&r, type))
++      return false;
++
++   return md_take(&r, out, out_size);
++}
++
++static bool
++md_compression(struct aimapper_gralloc *gr, const native_handle_t *handle,
++               char *name, size_t name_size, int64_t *value)
++{
++   uint8_t buf[256];
++   int32_t n = md_fetch(gr, handle, SMT_COMPRESSION, buf, sizeof(buf));
++   if (n < 0)
++      return false;
++
++   struct md_reader r = {buf, buf + n, true};
++   if (!md_header(&r, SMT_COMPRESSION))
++      return false;
++
++   md_take_str(&r, name, name_size);
++   *value = md_i64(&r);
++
++   return r.ok;
++}
++
++static int
++aimapper_get_buffer_basic_info(struct u_gralloc *gralloc,
++                               struct u_gralloc_buffer_handle *hnd,
++                               struct u_gralloc_buffer_basic_info *out)
++{
++   struct aimapper_gralloc *gr = (struct aimapper_gralloc *)gralloc;
++
++   if (!hnd->handle) {
++      mesa_logw("aimapper: FAIL null handle");
++      return -EINVAL;
++   }
++
++   const native_handle_t *query_hnd = hnd->handle;
++   const native_handle_t *imported = NULL;
++   uint8_t *buf = NULL;
++   int ret = -EINVAL;
++   int32_t got = 0;
++   int64_t num_planes = 0;
++   struct md_reader r = {NULL, NULL, false};
++
++   /* Probe PLANE_LAYOUTS first: already-imported GraphicBuffer handles answer
++    * directly; raw external handles may need importBuffer() on QTI IMapper5.
++    */
++   int32_t need = gr->mapper->v5.getStandardMetadata(query_hnd,
++                                                     SMT_PLANE_LAYOUTS, NULL, 0);
++   if (need <= 0 && gr->mapper->v5.importBuffer && gr->mapper->v5.freeBuffer) {
++      if (gr->mapper->v5.importBuffer(hnd->handle, &imported) == 0 && imported) {
++         query_hnd = imported;
++         need = gr->mapper->v5.getStandardMetadata(query_hnd,
++                                                   SMT_PLANE_LAYOUTS, NULL, 0);
++      }
++   }
++   if (need <= 0) {
++      mesa_logw("aimapper: PLANE_LAYOUTS unavailable (%d)", need);
++      goto out_free;
++   }
++
++   uint32_t fourcc = 0;
++   if (!md_scalar(gr, query_hnd, SMT_PIXEL_FORMAT_FOURCC, &fourcc,
++                  sizeof(fourcc)) || fourcc == 0) {
++      int derived = get_fourcc_from_hal_format(hnd->hal_format);
++      if (derived == -1) {
++         mesa_logw("aimapper: no fourcc from mapper and none for hal_format %d",
++                   hnd->hal_format);
++         goto out_free;
++      }
++      fourcc = (uint32_t)derived;
++   }
++   out->drm_fourcc = fourcc;
++
++   uint64_t modifier = 0;
++   if (md_scalar(gr, query_hnd, SMT_PIXEL_FORMAT_MODIFIER, &modifier,
++                 sizeof(modifier)))
++      out->modifier = modifier;
++   else
++      out->modifier = DRM_FORMAT_MOD_INVALID;
++
++   buf = MALLOC(need);
++   if (!buf) {
++      mesa_logw("aimapper: FAIL malloc %d", need);
++      ret = -ENOMEM;
++      goto out_free;
++   }
++
++   got = md_fetch(gr, query_hnd, SMT_PLANE_LAYOUTS, buf, need);
++   if (got < 0) {
++      mesa_logw("aimapper: FAIL PLANE_LAYOUTS fetch (need=%d got=%d)", need, got);
++      goto out_free;
++   }
++
++   r = (struct md_reader){buf, buf + got, true};
++   if (!md_header(&r, SMT_PLANE_LAYOUTS)) {
++      mesa_logw("aimapper: FAIL PLANE_LAYOUTS header framing (%d bytes)", got);
++      goto out_free;
++   }
++
++   num_planes = md_i64(&r);
++   if (!r.ok || num_planes <= 0 || num_planes > 4) {
++      mesa_logw("aimapper: implausible plane count %" PRId64, num_planes);
++      goto out_free;
++   }
++
++   for (int64_t i = 0; i < num_planes && r.ok; i++) {
++      int64_t num_components = md_i64(&r);
++      if (!r.ok || num_components < 0 || num_components > 16) {
++         mesa_logw("aimapper: FAIL plane %" PRId64 " component count %" PRId64
++                   " (ok=%d)", i, num_components, (int)r.ok);
++         goto out_free;
++      }
++
++      for (int64_t j = 0; j < num_components && r.ok; j++) {
++         md_skip_str(&r);   /* component type name */
++         md_i64(&r);        /* component type value */
++         md_i64(&r);        /* offsetInBits */
++         md_i64(&r);        /* sizeInBits */
++      }
++
++      int64_t offset_bytes = md_i64(&r);
++      md_i64(&r);                            /* sampleIncrementInBits */
++      int64_t stride_bytes = md_i64(&r);
++      md_i64(&r);                            /* widthInSamples */
++      md_i64(&r);                            /* heightInSamples */
++      md_i64(&r);                            /* totalSizeInBytes */
++      md_i64(&r);                            /* horizontalSubsampling */
++      md_i64(&r);                            /* verticalSubsampling */
++
++      if (!r.ok) {
++         mesa_logw("aimapper: FAIL plane %" PRId64 " field decode ran short", i);
++         goto out_free;
++      }
++
++      out->offsets[i] = (int)offset_bytes;
++      out->strides[i] = (int)stride_bytes;
++   }
++
++   out->num_planes = (int)num_planes;
++
++   char compr_name[128] = "";
++   int64_t compr_value = 0;
++   bool have_compr = md_compression(gr, query_hnd, compr_name,
++                                    sizeof(compr_name), &compr_value);
++
++   bool compr_says_compressed =
++      have_compr &&
++      (compr_value != 0 ||
++       strcmp(compr_name,
++              "android.hardware.graphics.common.Compression") != 0);
++
++   bool mod_says_ubwc = (out->modifier == DRM_FORMAT_MOD_QCOM_COMPRESSED);
++
++   /* QTI IMapper5 exposes single-plane RGB UBWC as 2 planes (data + metadata)
++    * while sometimes reporting modifier=LINEAR. Vendors may place the metadata
++    * plane at index 0 or index 1; always keep the color plane's stride.
++    */
++   bool is_yuv = is_hal_format_yuv(hnd->hal_format);
++   bool layout_says_ubwc =
++      !is_yuv && num_planes == 2 &&
++      ((out->offsets[1] == 0 && out->offsets[0] > 0 && out->strides[1] < out->strides[0]) ||
++       (out->offsets[0] == 0 && out->offsets[1] > 0 && out->strides[0] < out->strides[1]));
++
++   if (!is_yuv && num_planes <= 2 &&
++       (compr_says_compressed || mod_says_ubwc || layout_says_ubwc)) {
++      int color_plane =
++         (num_planes == 2 && out->offsets[0] == 0 && out->offsets[1] > 0) ? 1 : 0;
++      int meta_plane = 1 - color_plane;
++
++      static int logged_ubwc = 0;
++      if (p_atomic_cmpxchg(&logged_ubwc, 0, 1) == 0) {
++         mesa_logi("aimapper: compressed layout detected via %s "
++                   "(color plane %d stride=%d @%d, meta plane %d stride=%d @%d) "
++                   "- collapsing to 1 UBWC plane",
++                   compr_says_compressed ? "COMPRESSION metadata"
++                   : mod_says_ubwc ? "DRM modifier" : "plane signature",
++                   color_plane, out->strides[color_plane], out->offsets[color_plane],
++                   num_planes == 2 ? meta_plane : -1,
++                   num_planes == 2 ? out->strides[meta_plane] : 0,
++                   num_planes == 2 ? out->offsets[meta_plane] : 0);
++      }
++
++      out->strides[0] = out->strides[color_plane];
++      out->offsets[0] = 0;
++      out->offsets[1] = 0;
++      out->strides[1] = 0;
++      out->num_planes = 1;
++      num_planes = 1;
++      out->modifier = DRM_FORMAT_MOD_QCOM_COMPRESSED;
++   } else if (have_compr && !compr_says_compressed &&
++              out->modifier == DRM_FORMAT_MOD_INVALID) {
++      out->modifier = DRM_FORMAT_MOD_LINEAR;
++   }
++
++   if (hnd->handle->numFds == 0) {
++      mesa_logw("aimapper: FAIL handle has no fds");
++      goto out_free;
++   }
++
++   if (hnd->handle->numFds >= num_planes) {
++      for (int64_t i = 0; i < num_planes; i++)
++         out->fds[i] = hnd->handle->data[i];
++   } else {
++      for (int64_t i = 0; i < num_planes; i++)
++         out->fds[i] = hnd->handle->data[0];
++   }
++
++   uint64_t layer_count = 0;
++   if (md_scalar(gr, query_hnd, SMT_LAYER_COUNT, &layer_count,
++                 sizeof(layer_count)))
++      out->layer_count = layer_count;
++
++   uint64_t alloc_size = 0;
++   if (md_scalar(gr, query_hnd, SMT_ALLOCATION_SIZE, &alloc_size,
++                 sizeof(alloc_size)))
++      out->alloc_size = alloc_size;
++
++   ret = 0;
++
++out_free:
++   FREE(buf);
++   if (imported)
++      gr->mapper->v5.freeBuffer(imported);
++   return ret;
++}
++
++static int
++aimapper_get_buffer_color_info(struct u_gralloc *gralloc,
++                               struct u_gralloc_buffer_handle *hnd,
++                               struct u_gralloc_buffer_color_info *out)
++{
++   struct aimapper_gralloc *gr = (struct aimapper_gralloc *)gralloc;
++
++   if (!hnd->handle)
++      return -EINVAL;
++
++   out->yuv_color_space = __DRI_YUV_COLOR_SPACE_ITU_REC601;
++   out->sample_range = __DRI_YUV_NARROW_RANGE;
++   out->horizontal_siting = __DRI_YUV_CHROMA_SITING_0_5;
++   out->vertical_siting = __DRI_YUV_CHROMA_SITING_0_5;
++
++   const native_handle_t *query_hnd = hnd->handle;
++   const native_handle_t *imported = NULL;
++   uint32_t dataspace = 0;
++   bool have_ds = md_scalar(gr, query_hnd, SMT_DATASPACE, &dataspace, sizeof(dataspace));
++   if (!have_ds && gr->mapper->v5.importBuffer && gr->mapper->v5.freeBuffer) {
++      if (gr->mapper->v5.importBuffer(hnd->handle, &imported) == 0 && imported) {
++         query_hnd = imported;
++         have_ds = md_scalar(gr, query_hnd, SMT_DATASPACE, &dataspace, sizeof(dataspace));
++      }
++   }
++
++   if (have_ds) {
++      switch (dataspace & DS_STANDARD_MASK) {
++      case DS_STANDARD_BT709:
++         out->yuv_color_space = __DRI_YUV_COLOR_SPACE_ITU_REC709;
++         break;
++      case DS_STANDARD_BT2020:
++      case DS_STANDARD_BT2020_CL:
++         out->yuv_color_space = __DRI_YUV_COLOR_SPACE_ITU_REC2020;
++         break;
++      default:
++         break;
++      }
++
++      if ((dataspace & DS_RANGE_MASK) == DS_RANGE_FULL)
++         out->sample_range = __DRI_YUV_FULL_RANGE;
++   }
++
++   uint8_t buf[160];
++   int32_t n = md_fetch(gr, query_hnd, SMT_CHROMA_SITING, buf, sizeof(buf));
++   if (n > 0) {
++      struct md_reader r = {buf, buf + n, true};
++      if (md_header(&r, SMT_CHROMA_SITING)) {
++         md_skip_str(&r);
++         int64_t siting = md_i64(&r);
++         if (r.ok) {
++            switch (siting) {
++            case CHROMA_SITING_COSITED_HORIZONTAL:
++               out->horizontal_siting = __DRI_YUV_CHROMA_SITING_0;
++               break;
++            case CHROMA_SITING_COSITED_VERTICAL:
++               out->vertical_siting = __DRI_YUV_CHROMA_SITING_0;
++               break;
++            case CHROMA_SITING_COSITED_BOTH:
++               out->horizontal_siting = __DRI_YUV_CHROMA_SITING_0;
++               out->vertical_siting = __DRI_YUV_CHROMA_SITING_0;
++               break;
++            default:
++               break;
++            }
++         }
++      }
++   }
++
++   if (imported)
++      gr->mapper->v5.freeBuffer(imported);
++   return 0;
++}
++
++static int
++destroy(struct u_gralloc *gralloc)
++{
++   struct aimapper_gralloc *gr = (struct aimapper_gralloc *)gralloc;
++   FREE(gr);
++   return 0;
++}
++
++typedef void *(*sphal_load_fn)(const char *name, int flag);
++typedef int32_t (*load_imapper_fn)(AIMapper **outImplementation);
++
++static AIMapper *
++try_extract_mapper(void *lib)
++{
++   if (!lib)
++      return NULL;
++
++   load_imapper_fn fn = (load_imapper_fn)dlsym(lib, "AIMapper_loadIMapper");
++   if (!fn)
++      return NULL;
++
++   AIMapper *mapper = NULL;
++   if (fn(&mapper) != 0 || !mapper)
++      return NULL;
++
++   if (mapper->version < AIMAPPER_VERSION_5 || !mapper->v5.getStandardMetadata)
++      return NULL;
++
++   return mapper;
++}
++
++struct binder_mapper_list {
++   char names[16][128];
++   unsigned count;
++};
++
++static void
++collect_mapper_instance(const char *name, void *ctx)
++{
++   struct binder_mapper_list *list = (struct binder_mapper_list *)ctx;
++   if (!name || !name[0] || list->count >= ARRAY_SIZE(list->names))
++      return;
++   size_t len = strlen(name);
++   if (len >= sizeof(list->names[0]))
++      return;
++   memcpy(list->names[list->count], name, len + 1);
++   list->count++;
++}
++
++static void *
++load_mapper_via_binder(AIMapper **out_mapper)
++{
++   void *binder = dlopen("libbinder_ndk.so", RTLD_NOW | RTLD_LOCAL);
++   if (!binder)
++      return NULL;
++
++   typedef void (*visit_fn)(const char *, void *, void (*)(const char *, void *));
++   typedef void *(*open_fn)(const char *, const char *, int);
++   visit_fn visit = (visit_fn)dlsym(binder, "AServiceManager_forEachDeclaredInstance");
++   open_fn open_hal = (open_fn)dlsym(binder, "AServiceManager_openDeclaredPassthroughHal");
++   if (!visit || !open_hal) {
++      dlclose(binder);
++      return NULL;
++   }
++
++   struct binder_mapper_list list = {0};
++   visit("mapper", &list, collect_mapper_instance);
++
++   /* Prefer "default" first if declared, then try every remaining instance. */
++   for (int pass = 0; pass < 2; pass++) {
++      for (unsigned i = 0; i < list.count; i++) {
++         bool is_default = strcmp(list.names[i], "default") == 0;
++         if ((pass == 0) != is_default)
++            continue;
++
++         void *lib = open_hal("mapper", list.names[i], RTLD_NOLOAD | RTLD_NOW | RTLD_LOCAL);
++         if (!lib)
++            lib = open_hal("mapper", list.names[i], RTLD_NOW | RTLD_LOCAL);
++         AIMapper *mapper = try_extract_mapper(lib);
++         if (mapper) {
++            dlclose(binder);
++            *out_mapper = mapper;
++            return lib;
++         }
++      }
++   }
++
++   dlclose(binder);
++   return NULL;
++}
++
++static void *
++load_mapper_via_sphal(AIMapper **out_mapper)
++{
++   void *vndk = dlopen("libvndksupport.so", RTLD_NOW | RTLD_LOCAL);
++   if (!vndk)
++      return NULL;
++
++   sphal_load_fn sphal = (sphal_load_fn)dlsym(vndk, "android_load_sphal_library");
++   if (!sphal)
++      return NULL;
++
++   static const char *const dirs[] = {"/vendor/lib64/hw", "/vendor/lib/hw"};
++   for (unsigned d = 0; d < ARRAY_SIZE(dirs); d++) {
++      DIR *dir = opendir(dirs[d]);
++      if (!dir)
++         continue;
++
++      struct dirent *ent;
++      while ((ent = readdir(dir))) {
++         if (strncmp(ent->d_name, "mapper.", 7) != 0)
++            continue;
++         size_t len = strlen(ent->d_name);
++         if (len < 4 || strcmp(ent->d_name + len - 3, ".so") != 0)
++            continue;
++
++         void *lib = sphal(ent->d_name, RTLD_NOW);
++         AIMapper *mapper = try_extract_mapper(lib);
++         if (mapper) {
++            closedir(dir);
++            *out_mapper = mapper;
++            return lib;
++         }
++      }
++      closedir(dir);
++   }
++
++   /* Fallback when SELinux blocks opendir("/vendor/lib64/hw") from app processes. */
++   static const char *const known[] = {
++      "mapper.qti.so",
++      "mapper.qti_v5.so",
++      "mapper.minigbm.so",
++      "mapper.minigbm_msm.so",
++   };
++   for (unsigned i = 0; i < ARRAY_SIZE(known); i++) {
++      void *lib = sphal(known[i], RTLD_NOW);
++      AIMapper *mapper = try_extract_mapper(lib);
++      if (mapper) {
++         *out_mapper = mapper;
++         return lib;
++      }
++   }
++
++   return NULL;
++}
++
++struct u_gralloc *
++u_gralloc_aimapper_create(void)
++{
++   AIMapper *mapper = NULL;
++   const char *via = "binder-ndk";
++   void *lib = load_mapper_via_binder(&mapper);
++   if (!lib || !mapper) {
++      via = "SP-HAL";
++      lib = load_mapper_via_sphal(&mapper);
++   }
++   if (!lib || !mapper)
++      return NULL;
++
++   struct aimapper_gralloc *gr = CALLOC_STRUCT(aimapper_gralloc);
++   if (!gr)
++      return NULL;
++
++   gr->mapper_lib = lib;
++   gr->mapper = mapper;
++
++   gr->base.ops.get_buffer_basic_info = aimapper_get_buffer_basic_info;
++   gr->base.ops.get_buffer_color_info = aimapper_get_buffer_color_info;
++   gr->base.ops.destroy = destroy;
++
++   mesa_logi("N+ Turnip V6: Using IMapper v5 stable-C API (%s)", via);
++
++   return &gr->base;
++}
+--- a/src/util/u_gralloc/u_gralloc_fallback.c
++++ b/src/util/u_gralloc/u_gralloc_fallback.c
+@@ -148,9 +148,8 @@
+    out->strides[0] = stride;
+ 
+ #ifdef HAS_FREEDRENO
+-   uint32_t gmsm = ('g' << 24) | ('m' << 16) | ('s' << 8) | 'm';
+-   if (hnd->handle->numInts >= 2 && hnd->handle->data[hnd->handle->numFds] == gmsm) {
+-      /* This UBWC flag was introduced in a5xx. */
++   /* Newer Qualcomm grallocs (A8xx/Android 15+) dropped the legacy 'gmsm' magic. */
++   if (hnd->handle->numInts >= 2) {
+       bool ubwc = hnd->handle->data[hnd->handle->numFds + 1] & 0x08000000;
+       out->modifier = ubwc ? DRM_FORMAT_MOD_QCOM_COMPRESSED : DRM_FORMAT_MOD_LINEAR;
+    }
+--- a/src/util/u_gralloc/u_gralloc_internal.h
++++ b/src/util/u_gralloc/u_gralloc_internal.h
+@@ -35,6 +35,7 @@
+ #ifdef USE_IMAPPER4_METADATA_API
+ extern struct u_gralloc *u_gralloc_imapper_api_create(void);
+ #endif
++extern struct u_gralloc *u_gralloc_aimapper_create(void);
+ extern struct u_gralloc *u_gralloc_qcom_create(void);
+ extern struct u_gralloc *u_gralloc_libdrm_create(void);
+ extern struct u_gralloc *u_gralloc_fallback_create(void);
