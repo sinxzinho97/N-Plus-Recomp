@@ -5,15 +5,15 @@ Crie APKs Android dedicados para jogos de Nintendo Switch usando os arquivos do 
 > [!NOTE]
 > Este projeto está focado na evolução do **N+ Recomp** em conjunto com as melhorias da base Android (**nx2android**). Nenhum jogo, firmware ou chave acompanha o repositório.
 
-## Baixar a versão 3.2.8
+## Baixar a versão 3.3.0
 
 | Download | Para quem é | Primeiro passo |
 | --- | --- | --- |
-| [Criador para Android](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.2.8/N-Plus-Recomp-3.2.8-android-arm64.apk) | Android 13 ou superior, ARM64 | Instale o APK e abra **Criar**. |
-| [Criador para Windows](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.2.8/N-Plus-Recomp-3.2.8-windows-x64.zip) | Windows x64 | Extraia a pasta inteira e abra **N+ Recomp.exe**. |
-| [Driver de vídeo N+ Turnip V7](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.2.8/n-plus-turnip-V7.zip) | Opcional, para aparelhos Android com GPU Qualcomm Adreno compatível | Mantenha o ZIP fechado e importe-o pelo menu do jogo. [Instalação e retorno ao driver do sistema](docs/DRIVER.md) |
+| [Criador para Android](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.3.0/N-Plus-Recomp-3.3.0-android-arm64.apk) | Android 13 ou superior, ARM64 | Instale o APK e abra **Criar**. |
+| [Criador para Windows](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.3.0/N-Plus-Recomp-3.3.0-windows-x64.zip) | Windows x64 | Extraia a pasta inteira e abra **N+ Recomp.exe**. |
+| [Driver de vídeo N+ Turnip V7](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.3.0/n-plus-turnip-V7.zip) | Opcional, para aparelhos Android com GPU Qualcomm Adreno compatível | Mantenha o ZIP fechado e importe-o pelo menu do jogo. [Instalação e retorno ao driver do sistema](docs/DRIVER.md) |
 
-Os hashes SHA-256 e as notas acompanham os downloads. [Página da versão](https://github.com/sinxzinho97/N-Plus-Recomp/releases/tag/v3.2.8)
+Os hashes SHA-256 e as notas acompanham os downloads. [Página da versão](https://github.com/sinxzinho97/N-Plus-Recomp/releases/tag/v3.3.0)
 
 ## Principais recursos
 
@@ -32,7 +32,7 @@ Os hashes SHA-256 e as notas acompanham os downloads. [Página da versão](https
 
 ## Como funciona
 
-1. **Consulte o catálogo.** A versão 3.2.8 inclui **67 perfis**. Procure o jogo e confira a versão de referência e o estado do perfil. “Jogável” registra um resultado para aquela referência; jogos e updates fora da lista também podem ser tentados em caráter experimental. [Ver os 67 jogos e versões](docs/CATALOGO.md)
+1. **Consulte o catálogo.** A versão 3.3.0 inclui **69 perfis**. Procure o jogo e confira a versão de referência e o estado do perfil. “Jogável” registra um resultado para aquela referência; jogos e updates fora da lista também podem ser tentados em caráter experimental. [Ver os 69 jogos e versões](docs/CATALOGO.md)
 2. **Prepare o jogo.** Na aba **Criar**, selecione o jogo base e seu `prod.keys`. Adicione o update e as DLCs que quiser usar. O criador lê os arquivos, prepara os módulos e os gráficos e gera o APK e os dados do jogo (a primeira preparação costuma levar mais tempo). Se preparar no PC, copie para o celular o APK **e** a pasta de dados preparados. [Guia de uso](docs/USO.md)
 3. **Atualize uma instalação existente.** A aba **Atualizar** permite trocar o motor e o menu de um APK quando ele é compatível com os dados já preparados. Para instalar por cima mantendo seu save, use a assinatura original pela aba **Assinaturas**.
 

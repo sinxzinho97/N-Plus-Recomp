@@ -1,6 +1,6 @@
 # Quem fez o N+ Recomp
 
-**shirai91 (Tung Pham)** criou o **nx2android**, a base Android sobre a qual o **N+ Recomp** (mantido por **sinxzinho97**) evolui seus recursos próprios de vídeo, fluidez, mods e fluxo de preparação. O N+ Recomp incorporou a revisão `f3da64f` do nx2android como ponto de partida da base atual. [nx2android](https://github.com/shirai91/nx2android) · [Revisão integrada](https://github.com/shirai91/nx2android/tree/f3da64f7816209491e66e902af52b00fd39ca4c8) · [Licença MIT aplicável](licencas/nxnative-MIT.txt)
+**shirai91 (Tung Pham)** criou o **nx2android**, a base Android sobre a qual o **N+ Recomp** (mantido por **sinxzinho97**) evolui seus recursos próprios de vídeo, fluidez, mods e fluxo de preparação. O N+ Recomp incorporou a revisão `f3da64f` do nx2android como ponto de partida da base atual, somada às melhorias seletivas até `f32b3d5`. [nx2android](https://github.com/shirai91/nx2android) · [Revisão integrada](https://github.com/shirai91/nx2android/tree/f3da64f7816209491e66e902af52b00fd39ca4c8) · [Licença MIT aplicável](licencas/nxnative-MIT.txt)
 
 **sinxzinho97** mantém o N+ Recomp. Esta edição integra os criadores para Android e Windows, o menu dos jogos, a gestão de mods, controles, saves e drivers e as atualizações de motor. Os testes em aparelhos reais e os diagnósticos enviados pelos jogadores orientam as correções. [Perfil do mantenedor](https://github.com/sinxzinho97)
 

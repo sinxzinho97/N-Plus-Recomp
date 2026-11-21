@@ -1,13 +1,13 @@
-# Catálogo de jogos do N+ Recomp 3.2.8
+# Catálogo de jogos do N+ Recomp 3.3.0
 
-Os criadores Android e Windows distribuem os mesmos **67 perfis**. Alguns títulos têm edições regionais com IDs diferentes. Procure pelo **ID do jogo** se houver mais de uma entrada do mesmo título. A aba **Catálogo** do criador também mostra o aparelho informado pelo perfil, quando disponível.
+Os criadores Android e Windows distribuem os mesmos **69 perfis**. Alguns títulos têm edições regionais com IDs diferentes. Procure pelo **ID do jogo** se houver mais de uma entrada do mesmo título. A aba **Catálogo** do criador também mostra o aparelho informado pelo perfil, quando disponível.
 
 | Estado do perfil | Quantidade | O que esperar |
 | --- | ---: | --- |
-| Jogável | 57 | O perfil registra uma partida jogável nas condições de referência. O desempenho pode variar com a GPU, o driver e o aparelho. |
+| Jogável | 58 | O perfil registra uma partida jogável nas condições de referência. O desempenho pode variar com a GPU, o driver e o aparelho. |
 | Em desenvolvimento | 2 | O perfil já permite executar parte do jogo e ainda tem limitações conhecidas. |
 | Inicializa | 3 | O jogo chega a iniciar. O avanço durante a partida tem compatibilidade limitada. |
-| Experimental | 5 | Existe um perfil para preparar o jogo, com resultados que ainda precisam de confirmação ou investigação. |
+| Experimental | 6 | Existe um perfil para preparar o jogo, com resultados que ainda precisam de confirmação ou investigação. |
 
 ## Jogos e versões de referência
 
@@ -28,10 +28,12 @@ A coluna de versão mostra o número que aparece no jogo e, entre parênteses, o
 | Disco Elysium - The Final Cut | 1.0.7 (`v0`) | Jogável | `01006C5015E84000` |
 | Divinity: Original Sin 2 - Definitive Edition | 1.0.12 (`v786432`) | Jogável | `010027400CDC6000` |
 | Donkey Kong Country Returns HD | 1.1.0 (`v65536`) | Jogável | `01009D901BC56000` |
+| FIFA 21 Legacy Edition | 1.0.7 (`v0`) | Experimental | `01000A001171A000` |
 | FINAL FANTASY RESONANCE | 1.0.1 (`v65536`) | Jogável | `0100606026F12000` |
 | FINAL FANTASY RESONANCE (Asian release) | 1.0.1 (`v65536`) | Jogável | `0100B8A026F14000` |
 | FINAL FANTASY TACTICS - The Ivalice Chronicles | 1.4.0 (`v393216`), 1.5.1 (`v524288`) | Experimental | `010038B015560000` |
 | Fire Emblem Engage | 2.0.0 (`v327680`) | Jogável | `0100A6301214E000` |
+| Fire Emblem: Three Houses | 1.2.0 (`v327680`) | Jogável | `010055D009F78000` |
 | FM24 Touch | 1.0.1 (`v65536`) | Jogável | `01008B101B87A000` |
 | Football Manager 26 Touch | 1.0.2 (`v131072`) | Jogável | `0100D4A023450000` |
 | Graveyard Keeper 2 | 1.0.4 (`v262144`) | Jogável | `0100005027A18000` |
@@ -89,4 +91,4 @@ Na aba **Criar**, selecione os arquivos e aguarde a identificação. Quando o cr
 
 Para **Pokémon Legends: Arceus 1.1.1**, a criação seleciona o motor de compatibilidade quando os arquivos correspondem ao perfil. Ao atualizar um APK compatível dessa versão, o criador oferece também a escolha do motor. No caso de **Breath of the Wild** e **Tears of the Kingdom**, há relatos favoráveis do mantenedor no Galaxy S25 Ultra. Os dois perfis continuam classificados como experimentais nesta versão.
 
-Os estados acima foram lidos nos catálogos empacotados no APK e no ZIP do Windows da versão 3.2.8. Os perfis reúnem a base do nx2android e as alterações da edição mantida por sinxzinho97. [nx2android, de shirai91](https://github.com/shirai91/nx2android)
+Os estados acima foram lidos nos catálogos empacotados no APK e no ZIP do Windows da versão 3.3.0. Os perfis reúnem a base do nx2android e as alterações da edição mantida por sinxzinho97. [nx2android, de shirai91](https://github.com/shirai91/nx2android)
