@@ -1,6 +1,9 @@
 # N+ Recomp
 
-Prepare um aplicativo Android dedicado a cada jogo de Nintendo Switch usando os arquivos do seu próprio console. Você pode preparar o jogo no celular ou no PC. Nos dois casos, o APK gerado roda no Android e oferece o mesmo menu de vídeo, controles, mods, saves e diagnóstico.
+Crie APKs Android dedicados para jogos de Nintendo Switch usando os arquivos do seu próprio console. Você pode preparar tudo diretamente no celular ou no PC — nos dois casos, o aplicativo gerado inclui o mesmo menu no jogo com ajustes de vídeo, controles na tela, gerenciador de mods, backup de saves e diagnóstico.
+
+> [!NOTE]
+> Este projeto está focado na evolução do **N+ Recomp** em conjunto com as melhorias da base Android (**nx2android**). Nenhum jogo, firmware ou chave acompanha o repositório.
 
 ## Baixar a versão 3.2.8
 
@@ -12,18 +15,57 @@ Prepare um aplicativo Android dedicado a cada jogo de Nintendo Switch usando os 
 
 Os hashes SHA-256 e as notas acompanham os downloads. [Página da versão](https://github.com/sinxzinho97/N-Plus-Recomp/releases/tag/v3.2.8)
 
+## Principais recursos
+
+- **Criação no celular ou no PC:** gere o APK do jogo diretamente no Android ou prepare no Windows (útil para jogos maiores) mantendo exatamente os mesmos recursos no jogo.
+- **Recursos gráficos e de fluidez:** escolha entre nitidez com **FSR 1** ou **SGSR 1**, **escala de resolução de 0,5x a 2,0x**, **FPS adaptativo (ADPF)** para controlar aquecimento e **geração de quadros (LSFG 1.5x / 2x / 3x)** com controle de ritmo da taxa base.
+- **Drivers Vulkan personalizados:** use o driver do sistema ou importe pacotes `.zip` do Turnip diretamente pelo menu do jogo, com cache de pipelines separado por driver e **Modo seguro** caso algum ajuste impeça o boot.
+- **Mods, saves e assinaturas:** suporte a mods por pacote RomFS, patches de código e plugins ExeFS, além de importação/exportação de saves e transferência de chaves de assinatura entre PC e celular.
+- **Diagnóstico integrado:** exporte um pacote ZIP com logs de execução, patches/mods ativos e estado do aparelho sem precisar de cabo ou adb.
+
+## Antes de baixar
+
+- **Requisitos no celular:** Android 13 ou superior, arquitetura **ARM64**. O driver opcional **Turnip V7** é destinado apenas a aparelhos com GPU **Qualcomm Adreno** compatível; em outras GPUs (como Mali/Xclipse) ou em caso de erro visual, mantenha o **Driver do sistema**.
+- **Arquivos necessários:** tenha em mãos o backup do jogo e o arquivo `prod.keys` do seu próprio console (com updates e DLCs opcionais).
+- **Expectativa de compatibilidade:** o comportamento varia bastante entre jogos, versões de update, processadores e drivers. Confira o catálogo antes de preparar e trate títulos experimentais como testes em andamento.
+- **Primeira execução no PC:** na versão Windows, abra **Configuração → Baixar ferramentas faltantes** para baixar Android NDK, .NET SDK e ADB automaticamente; se **Android Java** aparecer pendente, instale o **JDK 17** e a **plataforma 36 do Android SDK com Build-Tools** (o Python já acompanha o ZIP).
+
 ## Como funciona
 
-1. **Consulte o catálogo.** A versão 3.2.8 inclui 67 perfis. Procure o jogo e confira a versão de referência e o estado do perfil. “Jogável” registra um resultado para aquela referência. O desempenho pode mudar com a atualização do jogo, o aparelho, a GPU e o driver. Jogos e updates fora da lista também podem ser tentados em caráter experimental. [Ver os 67 jogos e versões](docs/CATALOGO.md)
-2. **Prepare o jogo.** Na aba **Criar**, selecione o jogo base e seu `prod.keys`. Adicione o update e as DLCs que quiser usar. O criador lê os arquivos, prepara os módulos e os gráficos e gera o APK e os dados do jogo. A primeira preparação costuma levar mais tempo. Se for transferir do PC para o celular, leve o APK **e** os dados preparados. [Guia de uso](docs/USO.md)
-3. **Atualize uma instalação existente.** A aba **Atualizar** permite trocar o motor e o menu de um APK quando ele é compatível com os dados já preparados. Para instalar a atualização por cima, use a assinatura original. A aba **Assinaturas** permite fazer backup privado e transferir chaves entre PC e celular.
+1. **Consulte o catálogo.** A versão 3.2.8 inclui **67 perfis**. Procure o jogo e confira a versão de referência e o estado do perfil. “Jogável” registra um resultado para aquela referência; jogos e updates fora da lista também podem ser tentados em caráter experimental. [Ver os 67 jogos e versões](docs/CATALOGO.md)
+2. **Prepare o jogo.** Na aba **Criar**, selecione o jogo base e seu `prod.keys`. Adicione o update e as DLCs que quiser usar. O criador lê os arquivos, prepara os módulos e os gráficos e gera o APK e os dados do jogo (a primeira preparação costuma levar mais tempo). Se preparar no PC, copie para o celular o APK **e** a pasta de dados preparados. [Guia de uso](docs/USO.md)
+3. **Atualize uma instalação existente.** A aba **Atualizar** permite trocar o motor e o menu de um APK quando ele é compatível com os dados já preparados. Para instalar por cima mantendo seu save, use a assinatura original pela aba **Assinaturas**.
 
-**Primeira execução no PC.** Em **Configuração → Baixar ferramentas faltantes**, o criador pode obter o Android NDK, o .NET SDK e o ADB. Se a linha **Android Java** estiver pendente, instale também o JDK 17 e a plataforma 36 do Android SDK com Build-Tools. O Python acompanha o ZIP.
+## Perguntas rápidas (FAQ)
+
+<details>
+<summary>Preciso de PC para usar o N+ Recomp?</summary>
+
+Não. Todo o processo pode ser feito pelo aplicativo Android na aba **Criar**. O criador para Windows é uma opção para quem prefere preparar jogos pesados mais rápido no computador e depois copiar o APK + dados para o celular.
+</details>
+
+<details>
+<summary>Quando devo usar o Turnip V7 e como volto se der problema?</summary>
+
+Comece testando com o **Driver do sistema** se o jogo já abrir bem, ou importe o **N+ Turnip V7** apenas em aparelhos Snapdragon/Adreno compatíveis que tenham falhas gráficas ou perda de desempenho. Se a tela ficar preta ou instável após trocar o driver, abra **Gráficos → Driver de vídeo Vulkan** e volte para o **Driver do sistema** ou para o **n-plus-turnip-V6** ([detalhes em docs/DRIVER.md](docs/DRIVER.md)).
+</details>
+
+<details>
+<summary>Preciso refazer o jogo do zero quando sai uma nova versão do app?</summary>
+
+Nem sempre. Quando o novo lançamento mantém compatibilidade com os dados já preparados, basta usar a aba **Atualizar** com a mesma assinatura da aba **Assinaturas** para atualizar apenas o APK. Quando há mudança estrutural ou exigência de nova preparação, o criador e as notas da versão avisam antes.
+</details>
+
+<details>
+<summary>Onde envio resultados ou peço ajuda quando um jogo fecha ou trava?</summary>
+
+No menu de pausa do jogo, toque em **Preferências e diagnóstico → Salvar diagnóstico (ZIP)** e abra uma issue no GitHub anexando o ZIP junto do nome do jogo, versão do update, modelo do celular, GPU e driver usado.
+</details>
 
 ## Testou em outro aparelho?
 
-Se o jogo fecha ao carregar um save, mostra falhas gráficas ou perde fluidez, conte em que momento acontece. No menu de pausa, abra **Preferências e diagnóstico → Salvar diagnóstico (ZIP)**. Informe o jogo e sua versão, modelo do aparelho, Android, processador/GPU e driver. Um relato positivo também ajuda a identificar quais combinações funcionam. [Como coletar e revisar o diagnóstico](docs/DIAGNOSTICOS.md) · [Registrar um problema ou resultado](https://github.com/sinxzinho97/N-Plus-Recomp/issues/new/choose)
+Relatos positivos também ajudam tanto quanto relatos de bug — eles mostram quais combinações de aparelho, update e driver funcionam bem. [Como coletar e revisar o diagnóstico](docs/DIAGNOSTICOS.md) · [Registrar um problema ou resultado](https://github.com/sinxzinho97/N-Plus-Recomp/issues/new/choose)
 
 ## Créditos
 
-O N+ Recomp é desenvolvido e mantido por **sinxzinho97**. Este trabalho só foi possível graças a **shirai91 (Tung Pham)**, autor da integração Android no **nx2android**, e a **seedds**, autor do motor e das ferramentas originais do **nxnative**. O driver opcional deriva do **Mesa Turnip**, desenvolvido pela comunidade Mesa/Freedreno. [nx2android](https://github.com/shirai91/nx2android) · [nxnative](https://github.com/seedds/nxnative) · [Créditos, licenças e fontes dos componentes](CREDITOS.md)
+O **N+ Recomp** é desenvolvido e mantido por **sinxzinho97**. Este trabalho se apoia na base Android do projeto **nx2android**, criado por **shirai91 (Tung Pham)**. O driver Vulkan opcional deriva do **Mesa Turnip**, desenvolvido pela comunidade **Mesa/Freedreno**. [nx2android](https://github.com/shirai91/nx2android) · [Créditos, licenças e fontes dos componentes](CREDITOS.md)

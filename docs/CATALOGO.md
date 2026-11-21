@@ -89,4 +89,4 @@ Na aba **Criar**, selecione os arquivos e aguarde a identificação. Quando o cr
 
 Para **Pokémon Legends: Arceus 1.1.1**, a criação seleciona o motor de compatibilidade quando os arquivos correspondem ao perfil. Ao atualizar um APK compatível dessa versão, o criador oferece também a escolha do motor. No caso de **Breath of the Wild** e **Tears of the Kingdom**, há relatos favoráveis do mantenedor no Galaxy S25 Ultra. Os dois perfis continuam classificados como experimentais nesta versão.
 
-Os estados acima foram lidos nos catálogos empacotados no APK e no ZIP do Windows da versão 3.2.8. Os perfis reúnem a base do nx2android e do nxnative e as alterações da edição mantida por sinxzinho97. [nx2android, de shirai91](https://github.com/shirai91/nx2android) · [nxnative, de seedds](https://github.com/seedds/nxnative)
+Os estados acima foram lidos nos catálogos empacotados no APK e no ZIP do Windows da versão 3.2.8. Os perfis reúnem a base do nx2android e as alterações da edição mantida por sinxzinho97. [nx2android, de shirai91](https://github.com/shirai91/nx2android)
