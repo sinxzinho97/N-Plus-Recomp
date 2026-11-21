@@ -33,6 +33,6 @@ Guarde o backup da assinatura em local privado. Quem possui essa chave pode assi
 
 ## Experimente o driver opcional
 
-O **N+ Turnip V6** é distribuído separadamente para GPUs Adreno compatíveis. Para comparar com o driver do aparelho, abra o menu do jogo, entre em **Driver de vídeo Vulkan**, toque em **Importar driver (.zip)** e selecione o ZIP do driver, ainda compactado. Selecione o driver importado e reinicie o jogo quando solicitado. Use o mesmo save e as mesmas opções de vídeo para comparar imagem e fluidez na mesma área. Você pode voltar ao driver do sistema pelo mesmo menu.
+O **N+ Turnip V7** é distribuído separadamente para GPUs Adreno compatíveis. Para comparar com o driver do aparelho, abra o menu do jogo, entre em **Driver de vídeo Vulkan**, toque em **Importar driver (.zip)** e selecione o ZIP do driver, ainda compactado. Selecione o driver importado e reinicie o jogo quando solicitado. Use o mesmo save e as mesmas opções de vídeo para comparar imagem e fluidez na mesma área. Você pode voltar ao driver do sistema pelo mesmo menu.
 
 Se o jogo fechar, apresentar falha gráfica ou tiver travadas frequentes, abra **Preferências e diagnóstico → Salvar diagnóstico (ZIP)** e descreva o ocorrido nas Issues do projeto. Inclua a versão do criador, o jogo e a versão do jogo, o aparelho, a GPU e o driver escolhido. Confira o conteúdo do ZIP antes de anexá-lo. Arquivos do jogo, saves pessoais, `prod.keys` e backups de assinatura devem ficar com você. [Como coletar o diagnóstico](DIAGNOSTICOS.md)

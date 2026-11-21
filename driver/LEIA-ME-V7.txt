@@ -1,0 +1,47 @@
+N+ Turnip V7 (Mesa 26.3.0 + ThinLTO) - Driver Vulkan para Android ARM64 (Adreno 6xx/7xx/8xx)
+
+O que muda do V6 para o V7
+
+1. Mesma base Mesa 26.3.0 e as mesmas correções do V6: reset leve do LRZ ao
+   final de passes GMEM na Adreno 8xx, GRAS_LRZ_COLOR_COMP_MASK, prefetch de
+   textura do V5, IMapper5/UBWC universal, recuperação do layout de display
+   (S25 Ultra / Adreno 830) e alinhamento de 16 KiB. Nenhuma mudança de
+   comportamento gráfico pretendida.
+2. A biblioteca é compilada com ThinLTO (-Db_lto=true -Db_lto_mode=thin),
+   pela opção experimental allow-broken-lto do próprio Mesa. O Mesa rejeita
+   LTO por padrão porque bugs de LTO são difíceis de depurar; este pacote
+   assume esse risco de forma rotulada. O caminho de submit do Turnip
+   (descritores, draws, render passes) é quente em CPU nos jogos pesados; o
+   LTO pode reduzir esse custo. O ganho varia por jogo e precisa de
+   comparação no mesmo aparelho. Se qualquer jogo instabilizar com o V7
+   (travamento, tela preta, glitch novo), volte ao V6 no mesmo menu e
+   relate o jogo/trecho: o LTO é a única diferença.
+3. Identificação própria: "Mesa 26.3.0 / N+ Turnip V7" nas propriedades do
+   driver e marcadores V7 no log. O cache de pipelines é separado por UUID
+   do driver: a primeira abertura com o V7 reconstrói o cache; da segunda em
+   diante o jogo roda liso.
+
+Como instalar no N+ Recomp
+
+- Abra o jogo -> Menu de pausa -> Gráficos -> Driver Vulkan -> Importar ZIP
+  -> selecione n-plus-turnip-V7.zip.
+- Feche e abra o jogo novamente. O V6 continua importado: a troca é por jogo
+  e pode ser revertida no mesmo menu.
+
+Como comparar V6 e V7
+
+- Mesmo jogo, mesma versão, mesmo save, mesmo trecho, mesmas configurações
+  (modo portátil, limite padrão, FG desligado para a primeira comparação).
+- Deixe o cache do V7 encher (uma passada completa pelo trecho) antes de
+  medir a segunda.
+- Compare o GPU e o work p50/p90/p95 no diagnóstico [pace] e a fluidez na
+  mesma câmera. Com o criador 3.2.2, o custo do FG também aparece no log,
+  se quiser comparar com geração ligada.
+- Se o V7 não mostrar ganho ou mostrar regressão em algum jogo, volte ao V6
+  no menu e relate o jogo/trecho: o LTO é a única diferença.
+
+Compilação
+
+compilar-turnip.sh package v7 (Linux/WSL; NPLUS_TURNIP_LTO=0 compila sem LTO
+para comparação). A receita verifica fonte e NDK por hash, aplica o patch
+mesa-26.3.0-nplus-v7.patch e confere os marcadores V7 no ELF antes de empacotar.

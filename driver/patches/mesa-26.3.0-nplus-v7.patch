@@ -139,7 +139,7 @@
     memset(p->driverInfo, 0, sizeof(p->driverInfo));
     snprintf(p->driverInfo, VK_MAX_DRIVER_INFO_SIZE,
 -            "Mesa " PACKAGE_VERSION MESA_GIT_SHA1);
-+            "Mesa " PACKAGE_VERSION MESA_GIT_SHA1 " / N+ Turnip V6");
++            "Mesa " PACKAGE_VERSION MESA_GIT_SHA1 " / N+ Turnip V7");
     p->conformanceVersion = (VkConformanceVersion) {
        .major = 1,
        .minor = 4,
@@ -454,7 +454,7 @@
 +      const bool ubwc = recovered == DRM_FORMAT_MOD_QCOM_COMPRESSED;
 +      int *once = &reported[ubwc ? 1 : 0];
 +      if (p_atomic_cmpxchg(once, 0, 1) == 0)
-+         mesa_logi("N+ Turnip V6: IMapper5 confirmed RGBA display buffer layout %s",
++         mesa_logi("N+ Turnip V7: IMapper5 confirmed RGBA display buffer layout %s",
 +                   ubwc ? "UBWC" : "LINEAR");
 +   }
 +}
@@ -1184,7 +1184,7 @@
 +   gr->base.ops.get_buffer_color_info = aimapper_get_buffer_color_info;
 +   gr->base.ops.destroy = destroy;
 +
-+   mesa_logi("N+ Turnip V6: Using IMapper v5 stable-C API (%s)", via);
++   mesa_logi("N+ Turnip V7: Using IMapper v5 stable-C API (%s)", via);
 +
 +   return &gr->base;
 +}

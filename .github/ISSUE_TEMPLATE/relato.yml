@@ -21,7 +21,7 @@ body:
     id: versoes
     attributes:
       label: Jogo, versão do jogo e versão do criador
-      placeholder: "Exemplo: Tears of the Kingdom 1.4.3, N+ Recomp 3.0.11 para Windows"
+      placeholder: "Exemplo: Tears of the Kingdom 1.4.3, N+ Recomp 3.2.8 para Windows"
     validations:
       required: true
   - type: textarea

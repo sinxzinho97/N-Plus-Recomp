@@ -8,7 +8,7 @@
 
 O tradutor de shaders usa trabalho dos colaboradores do **Ryujinx**. O motor também incorpora trabalho dos projetos **libadrenotools**, **Vulkan-Headers**, **bcdec**, **Zstandard** e **Fusion Pixel Font**, entre outros. Os avisos por componente e os créditos às adaptações de **MacNativeGames** e **deko3d** acompanham a árvore `nxnative/dm/third_party` no pacote Windows. O filtro **FidelityFX Super Resolution 1** usa código da **AMD**. [AMD FidelityFX FSR](https://github.com/GPUOpen-Effects/FidelityFX-FSR) · [Licença do FSR](licencas/AMD-FSR1-MIT.txt)
 
-O **N+ Turnip V6** é uma variante do driver Vulkan **Turnip**, do projeto **Mesa/Freedreno**. O guia do driver identifica as contribuições comunitárias, a receita de compilação e os aparelhos para os quais se destina. [Créditos, fontes e uso do driver](docs/DRIVER.md)
+O **N+ Turnip V7** é uma variante do driver Vulkan **Turnip**, do projeto **Mesa/Freedreno**. O guia do driver identifica as contribuições comunitárias, a receita de compilação e os aparelhos para os quais se destina. [Créditos, fontes e uso do driver](docs/DRIVER.md)
 
 ## Fontes e licenças do pacote Windows
 
