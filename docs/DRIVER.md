@@ -10,7 +10,7 @@ O pacote tem como alvo as famílias Adreno 6xx, 7xx e 8xx. O modelo da GPU, o si
 
 ## Instalar ou voltar ao driver anterior
 
-1. Baixe o driver e guarde o ZIP inteiro no celular. [Baixar n-plus-turnip-V7.zip](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.3.0/n-plus-turnip-V7.zip)
+1. Baixe o driver e guarde o ZIP inteiro no celular. [Baixar n-plus-turnip-V7.zip](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.5.0/n-plus-turnip-V7.zip)
 2. Salve seu progresso. No menu do jogo, abra **Gráficos → Driver de vídeo Vulkan → Importar driver (.zip)**.
 3. Escolha o ZIP, selecione **n-plus-turnip-V7** na lista e toque em **Reiniciar jogo**. A escolha vale para esse jogo. Os outros jogos continuam com o driver que você escolheu para cada um.
 4. Como o cache de pipelines é separado por UUID do driver, a primeira abertura com o V7 reconstrói o cache; a partir da segunda abertura, o carregamento volta ao normal.
