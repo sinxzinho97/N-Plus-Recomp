@@ -6,13 +6,13 @@ O **N+ Recomp** prepara um aplicativo Android dedicado a cada jogo suportado a p
 
 | Plataforma / Item | Arquivo | Tamanho | Como usar |
 | --- | --- | --- | --- |
-| Android 13 ou superior (ARM64) | `N-Plus-Recomp-3.7.0-android-arm64.apk` | 110,37 MB | Instale o APK do criador (mantém a assinatura anterior para atualização direta). |
-| Windows x64 | `N-Plus-Recomp-3.7.0-windows-x64.zip` | 608,50 MB | Extraia a pasta inteira e abra `N+ Recomp.exe`. |
+| Android 13 ou superior (ARM64) | `N-Plus-Recomp-3.7.0-android-arm64.apk` | 110,43 MB | Instale o APK do criador (mantém a assinatura anterior para atualização direta). |
+| Windows x64 | `N-Plus-Recomp-3.7.0-windows-x64.zip` | 608,53 MB | Extraia a pasta inteira e abra `N+ Recomp.exe`. |
 | Driver de vídeo Adreno | `n-plus-turnip-V8.zip` | 2,66 MB | Opcional para GPUs Qualcomm Adreno compatíveis. Importe fechado (`.zip` ou `.rar`) pelo menu de vídeo do jogo ou durante a criação. |
 
 Verifique a integridade dos downloads em [`SHA256SUMS.txt`](SHA256SUMS.txt):
-- `N-Plus-Recomp-3.7.0-android-arm64.apk`: `bc4d12768db9146523a2f599e840364f7408191a67737999ad0e266cee2f4bd2`
-- `N-Plus-Recomp-3.7.0-windows-x64.zip`: `d2d0e71d19a1e0d57f0631fbb4be540a28781ca04e9ed39b1970f295979463ea`
+- `N-Plus-Recomp-3.7.0-android-arm64.apk`: `076d70531625aea3945471e93a175bdb3683a2024558278a6354fce0e5d1c6aa`
+- `N-Plus-Recomp-3.7.0-windows-x64.zip`: `7d330c3b780a0c844e2fef2215913bd739e33214234d395a262cfd84b8c80136`
 - `n-plus-turnip-V8.zip`: `86e93ceeda63d5ab117012310c54b3e2839e229ad2185b3f1e5255bb5849c56d`
 
 ## Principais novidades da 3.7.0
