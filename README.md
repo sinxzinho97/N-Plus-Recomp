@@ -1,71 +1,111 @@
-# N+ Recomp
+# N+ Recomp — Versão 3.7.0
 
-Crie APKs Android dedicados para jogos de Nintendo Switch usando os arquivos do seu próprio console. Você pode preparar tudo diretamente no celular ou no PC — nos dois casos, o aplicativo gerado inclui o mesmo menu no jogo com ajustes de vídeo, controles na tela, gerenciador de mods, backup de saves e diagnóstico.
+O **N+ Recomp** prepara um aplicativo Android dedicado a cada jogo suportado a partir dos arquivos originais do jogador. Os criadores **Windows x64** e **Android 13+ (ARM64)** compartilham o mesmo catálogo, as mesmas referências de compatibilidade e o mesmo menu dentro do jogo.
 
-> [!NOTE]
-> Este projeto está focado na evolução do **N+ Recomp** em conjunto com as melhorias da base Android (**nx2android**). Nenhum jogo, firmware ou chave acompanha o repositório.
+## Downloads (`v3.7.0`)
 
-## Baixar a versão 3.5.0
+| Plataforma / Item | Arquivo | Tamanho | Como usar |
+| --- | --- | --- | --- |
+| Android 13 ou superior (ARM64) | `N-Plus-Recomp-3.7.0-android-arm64.apk` | 110,37 MB | Instale o APK do criador (mantém a assinatura anterior para atualização direta). |
+| Windows x64 | `N-Plus-Recomp-3.7.0-windows-x64.zip` | 608,50 MB | Extraia a pasta inteira e abra `N+ Recomp.exe`. |
+| Driver de vídeo Adreno | `n-plus-turnip-V8.zip` | 2,66 MB | Opcional para GPUs Qualcomm Adreno compatíveis. Importe fechado (`.zip` ou `.rar`) pelo menu de vídeo do jogo ou durante a criação. |
 
-| Download | Para quem é | Primeiro passo |
+Verifique a integridade dos downloads em [`SHA256SUMS.txt`](SHA256SUMS.txt):
+- `N-Plus-Recomp-3.7.0-android-arm64.apk`: `bc4d12768db9146523a2f599e840364f7408191a67737999ad0e266cee2f4bd2`
+- `N-Plus-Recomp-3.7.0-windows-x64.zip`: `d2d0e71d19a1e0d57f0631fbb4be540a28781ca04e9ed39b1970f295979463ea`
+- `n-plus-turnip-V8.zip`: `86e93ceeda63d5ab117012310c54b3e2839e229ad2185b3f1e5255bb5849c56d`
+
+## Principais novidades da 3.7.0
+
+- **Estabilidade Exynos + Snapdragon e driver Turnip V8**: melhorias de gerenciamento de VRAM nos hosts para Exynos/Xclipse 940, correções específicas em *Dragon Ball: Sparking! ZERO* (`2.0.73`) e driver `n-plus-turnip-V8.zip` atualizado.
+- **Interface redesenhada e criação simplificada**: menos etapas na aba **Criar**, opções avançadas recolhidas, bloqueio de títulos fora do catálogo, confirmação para updates experimentais e remoção das abas `Assinaturas` e `Saves`.
+- **Chaves de assinatura automáticas**: salvas e lidas automaticamente na pasta `keys` (`<destino>/keys/` no PC e `Android/media/org.nx2a.builder.mods/keys/` no celular) para manter atualizações compatíveis entre PC e Android.
+- **Menu dentro do jogo renovado + `.zip`/`.rar` + vários mods**: seleção de múltiplos mods simultâneos em `.zip` ou `.rar`, importação de drivers em `.zip` ou `.rar` e ativação imediata logo após importar.
+
+## Jogos funcionais (71 títulos verificados)
+
+| Jogo | Versões de referência | Onde foi testado |
 | --- | --- | --- |
-| [Criador para Android](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.5.0/N-Plus-Recomp-3.5.0-android-arm64.apk) | Android 13 ou superior, ARM64 | Instale o APK e abra **Criar**. |
-| [Criador para Windows](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.5.0/N-Plus-Recomp-3.5.0-windows-x64.zip) | Windows x64 | Extraia a pasta inteira e abra **N+ Recomp.exe**. |
-| [Driver de vídeo N+ Turnip V7](https://github.com/sinxzinho97/N-Plus-Recomp/releases/download/v3.5.0/n-plus-turnip-V7.zip) | Opcional, para aparelhos Android com GPU Qualcomm Adreno compatível | Mantenha o ZIP fechado e importe-o pelo menu do jogo. [Instalação e retorno ao driver do sistema](docs/DRIVER.md) |
+| 13 Sentinels: Aegis Rim | 1.10 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| 13 Sentinels: Aegis Rim (Asia) | 1.00 | v0 Xiaomi 23117RK66C (Snapdragon 8 Gen 3, Adreno 750, Android 16) |
+| Advance Wars 1+2: Re-Boot Camp | 1.0.0 | v0 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Animal Crossing: New Horizons | 3.0.3 | v2228224 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Blasphemous 2 | 1.0.8 | v524288 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Captain Toad: Treasure Tracker | 1.4.2 | v393216 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Cardfight!! Vanguard Dear Days 2 | 1.7.2 | v1441792 AYN Odin 2 (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Castlevania: Belmont's Curse | 1.1.0 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Celeste | 1.4.1.1 | v589824 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| DARK SOULS: REMASTERED | 1.0.3 | v196608 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Disco Elysium - The Final Cut | 1.0.7 | v0 (1.0.7) Sony XQ-DQ72 (Adreno 740) and OnePlus 15 (Snapdragon 8 Elite Gen 5), 2026-11-10 |
+| Divinity: Original Sin 2 - Definitive Edition | 1.0.12 | v786432 Legion Y700 Gen 4 (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Donkey Kong Country Returns HD | 1.1.0 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| DRAGON BALL: Sparking! ZERO | 1.0.0, 2.0.73 | 1.0.0, 2.0.7 e 2.0.73 (início de gameplay) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8); 2.0.73: Batalha Personalizada e terreno em combate no Samsung Galaxy S25 FE (Exynos 2400, Xclipse 940, driver Samsung). |
+| DRAGON QUEST XI S: Echoes of an Elusive Age – Definitive Edition | 1.0.4, 1.0.3 | 1.0.4 (início de gameplay) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8); referência anterior AYN Odin 2 (Adreno 740, Turnip). Versões 1.0.4 (v262144) e 1.0.3 (v196608) registradas com decodificador LZ5 embarcado. |
+| FINAL FANTASY RESONANCE | 1.0.1 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| FINAL FANTASY RESONANCE (Asian release) | 1.0.1 | v65536 Lenovo Legion Y700 TB321FU (Snapdragon 8 Gen 3, Adreno 750, Android 16) |
+| Fire Emblem Engage | 2.0.0 | v327680 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Fire Emblem: Three Houses | 1.2.0 | v327680 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| FM24 Touch | 1.0.1 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Football Manager 26 Touch | 1.0.2 | v131072 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Graveyard Keeper 2 | 1.0.4 | v262144 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Hades II | 1.0.141667, 0.0.126424 | v655360 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Hollow Knight: Silksong | 1.0.30000 | v655360 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Kirby and the Forgotten Land | 1.1.0 | v65536 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Kirby’s Return to Dream Land Deluxe | 1.0.0 | v0 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Layton's Mystery Journey: Katrielle and the Millionaires' Conspiracy DX+ | 1.1.0 | v65536 iQOO 9 V2171A (Snapdragon 8 Gen 1, Adreno 730, Android 15) |
+| Lonely Mountains: Downhill | 1.0.5 | v0 Retroid Pocket 6 (QCS8550, Adreno 740, Android 13); PurpleVK-public git-62ac221a33 |
+| Mario vs. Donkey Kong | 1.0.1 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| MEGAMAN BATTLE NETWORK LEGACY COLLECTION Vol.1 | 1.0.2 | v131072 (1.0.2) AYN Odin 2 (QCS8550, Adreno 740, Android 13, Turnip), 2026-11-14 |
+| MEGAMAN BATTLE NETWORK LEGACY COLLECTION Vol.2 | 1.0.3 | v196608 (1.0.3) AYN Odin 2 (QCS8550, Adreno 740, Android 13, Turnip), 2026-11-13 |
+| Metroid Dread | 2.1.0 | v327680 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Monster Hunter Rise | 16.0.2 | 16.0.2 (início de gameplay; criado do zero no celular) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8) |
+| NEO: The World Ends with You | 1.03 | v196608 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| NOBUNAGA'S AMBITION: Shinsei | 1.0.1 | v65536 Lenovo Legion Y700 TB321FU (Snapdragon 8 Gen 3, Adreno 750, Android 16) |
+| OCTOPATH TRAVELER 0 | 1.0.5 | v327680 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Paper Mario: The Origami King | 1.0.1 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Picross S＋ | 1.0.1 | v65536 Retroid Pocket 6 (Adreno 740, Android 13); PurpleVK-public git-62ac221a33 |
+| Pokémon Brilliant Diamond | 1.3.0 | v393216 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Pokémon Legends: Arceus | 1.1.1 | v262144 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Pokémon Legends: Z-A | 2.0.2 | v393216 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Pokémon Mystery Dungeon Rescue Team DX | 1.0.2 | 1.0.2 AYN Odin 2 (Adreno 740, Turnip) |
+| Pokémon Scarlet | 4.0.0, 1.0.0 | 1.0.0 e 4.0.0 (com mods) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830) |
+| Pokémon Shield | 1.3.2 | v458752 AYN Odin 2 (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Pokémon Shining Pearl | 1.3.0 | 1.3.0 (início de gameplay) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8) |
+| Pokémon Sword | 1.3.2 | v458752 AYN Odin 2 (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Pokémon Violet | 4.0.0 | 4.0.0 AYN Odin 2 (Adreno 740, Android 13, Turnip) |
+| Rhythm Heaven Groove | 1.0.0 | v0 Xiaomi 15 (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| ROMANCE OF THE THREE KINGDOMS XIV | 1.1.1 | v786432 Xiaomi 2410DPN6CC haotian (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| South Park™: The Stick Of Truth™ | 1.0.0 | v0 Xiaomi Pad 5 21051182G (Snapdragon 860, Adreno 640, Android 13) |
+| Super Mario 3D World + Bowser's Fury | 1.2.2 | v262144 AYN Thor (Snapdragon 8 Gen 2, Adreno 740, Android 13) |
+| Super Mario Bros. Wonder | 1.0.0, 1.2.1 | v327680 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Super Mario Odyssey | 1.4.1 | v393216 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Super Robot Wars 30 | 1.2.3 | v655360 Lenovo Legion Y700 TB321FU (Snapdragon 8 Gen 3, Adreno 750, Android 16) |
+| Tales of Berseria Remastered | 1.0.5 | v262144 (1.0.5) Sony XQ-DQ72 (Adreno 740) and OnePlus 15 (Snapdragon 8 Elite Gen 5) |
+| Tales of Eternia Remastered | 2.0.0 | v65536 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| The Legend of Zelda: Breath of the Wild | 1.9.0, 1.6.0 | 1.6.0 e 1.9.0 (com mods) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8) |
+| The Legend of Zelda: Echoes of Wisdom | 1.1.0 | v196608 Retroid Pocket 6 (Adreno 740, PurpleVK) |
+| The Legend of Zelda: Link's Awakening | 1.1.0 | v131072 Lenovo TB323FU (Snapdragon 8 Elite Gen 5, Adreno 840, Android 16) |
+| The Legend of Zelda: Tears of the Kingdom | 1.4.3, 1.2.1 | 1.2.1 e 1.4.3 (com mods) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8) |
+| The World Ends with You -Final Remix- | 1.0.0 | v0 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Tomodachi Life: Living the Dream | 1.0.4 | v262144 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Ultra Kaiju Monster Rancher | 1.0.1 | v0 AYN Odin 2 (Snapdragon 8 Gen 2, Adreno 740, Turnip driver), tutorials and battles |
+| UNDER NIGHT IN-BIRTH Exe:Late[cl-r] | 1.0.3 | v131072 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| UNDER NIGHT IN-BIRTH II Sys:Celes | 1.42 | v1179648 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Unpacking | 2.01 | v327680 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Untitled Goose Game | 1.1.2, 1.0.0 | v458752 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Viractal | 1.4.5 | v131072 Lenovo Legion Y700 TB322FC (Snapdragon 8 Elite, Adreno 830, Android 16) |
+| Xenoblade Chronicles X: Definitive Edition | 1.0.2 | 1.0.2 (início de gameplay; criado do zero no celular) — Samsung Galaxy S25 Ultra (SM-S938B, Snapdragon 8 Elite, Adreno 830, N+ Turnip V8) |
+| Xenoblade Chronicles: Definitive Edition | 2.0.0 | v262144 AYN Odin 2 (Snapdragon 8 Gen 2, Adreno 740, Android 13); Turnip (vulkan.ad07xx.so) |
+| 歧路旅人0 OCTOPATH TRAVELER 0 | 1.0.5 | v327680 Xiaomi 23117RK66C (Android 16) |
 
-Os hashes SHA-256 e as notas acompanham os downloads. [Página da versão](https://github.com/sinxzinho97/N-Plus-Recomp/releases/tag/v3.5.0)
+## Como preparar ou atualizar
 
-## Principais recursos
-
-- **Criação no celular ou no PC:** gere o APK do jogo diretamente no Android ou prepare no Windows (útil para jogos maiores) mantendo exatamente os mesmos recursos no jogo.
-- **Recursos gráficos e de fluidez:** escolha entre nitidez com **FSR 1** ou **SGSR 1**, **escala de resolução de 0,5x a 2,0x**, **FPS adaptativo (ADPF)** para controlar aquecimento e **geração de quadros (LSFG 1.5x / 2x / 3x)** com controle de ritmo da taxa base.
-- **Drivers Vulkan personalizados:** use o driver do sistema ou importe pacotes `.zip` do Turnip diretamente pelo menu do jogo, com cache de pipelines separado por driver e **Modo seguro** caso algum ajuste impeça o boot.
-- **Mods, saves e assinaturas:** suporte a mods por pacote RomFS, patches de código e plugins ExeFS, além de importação/exportação de saves e transferência de chaves de assinatura entre PC e celular.
-- **Diagnóstico integrado:** exporte um pacote ZIP com logs de execução, patches/mods ativos e estado do aparelho sem precisar de cabo ou adb.
-
-## Antes de baixar
-
-- **Requisitos no celular:** Android 13 ou superior, arquitetura **ARM64**. O driver opcional **Turnip V7** é destinado apenas a aparelhos com GPU **Qualcomm Adreno** compatível; em outras GPUs (como Mali/Xclipse) ou em caso de erro visual, mantenha o **Driver do sistema**.
-- **Arquivos necessários:** tenha em mãos o backup do jogo e o arquivo `prod.keys` do seu próprio console (com updates e DLCs opcionais).
-- **Expectativa de compatibilidade:** o comportamento varia bastante entre jogos, versões de update, processadores e drivers. Confira o catálogo antes de preparar e trate títulos experimentais como testes em andamento.
-- **Primeira execução no PC:** na versão Windows, abra **Configuração → Baixar ferramentas faltantes** para baixar Android NDK, .NET SDK e ADB automaticamente; se **Android Java** aparecer pendente, instale o **JDK 17** e a **plataforma 36 do Android SDK com Build-Tools** (o Python já acompanha o ZIP).
-
-## Como funciona
-
-1. **Consulte o catálogo.** A versão 3.5.0 inclui **77 perfis**. Procure o jogo e confira a versão de referência e o estado do perfil. “Jogável” registra um resultado para aquela referência; jogos e updates fora da lista também podem ser tentados em caráter experimental. [Ver os 77 jogos e versões](docs/CATALOGO.md)
-2. **Prepare o jogo.** Na aba **Criar**, selecione o jogo base e seu `prod.keys`. Adicione o update e as DLCs que quiser usar. O criador lê os arquivos, prepara os módulos e os gráficos e gera o APK e os dados do jogo (a primeira preparação costuma levar mais tempo). Se preparar no PC, copie para o celular o APK **e** a pasta de dados preparados. [Guia de uso](docs/USO.md)
-3. **Atualize uma instalação existente.** A aba **Atualizar** permite trocar o motor e o menu de um APK quando ele é compatível com os dados já preparados. Para instalar por cima mantendo seu save, use a assinatura original pela aba **Assinaturas**.
-
-## Perguntas rápidas (FAQ)
-
-<details>
-<summary>Preciso de PC para usar o N+ Recomp?</summary>
-
-Não. Todo o processo pode ser feito pelo aplicativo Android na aba **Criar**. O criador para Windows é uma opção para quem prefere preparar jogos pesados mais rápido no computador e depois copiar o APK + dados para o celular.
-</details>
-
-<details>
-<summary>Quando devo usar o Turnip V7 e como volto se der problema?</summary>
-
-Comece testando com o **Driver do sistema** se o jogo já abrir bem, ou importe o **N+ Turnip V7** apenas em aparelhos Snapdragon/Adreno compatíveis que tenham falhas gráficas ou perda de desempenho. Se a tela ficar preta ou instável após trocar o driver, abra **Gráficos → Driver de vídeo Vulkan** e volte para o **Driver do sistema** ou para o **n-plus-turnip-V6** ([detalhes em docs/DRIVER.md](docs/DRIVER.md)).
-</details>
-
-<details>
-<summary>Preciso refazer o jogo do zero quando sai uma nova versão do app?</summary>
-
-Nem sempre. Quando o novo lançamento mantém compatibilidade com os dados já preparados, basta usar a aba **Atualizar** com a mesma assinatura da aba **Assinaturas** para atualizar apenas o APK. Quando há mudança estrutural ou exigência de nova preparação, o criador e as notas da versão avisam antes.
-</details>
-
-<details>
-<summary>Onde envio resultados ou peço ajuda quando um jogo fecha ou trava?</summary>
-
-No menu de pausa do jogo, toque em **Preferências e diagnóstico → Salvar diagnóstico (ZIP)** e abra uma issue no GitHub anexando o ZIP junto do nome do jogo, versão do update, modelo do celular, GPU e driver usado.
-</details>
-
-## Testou em outro aparelho?
-
-Relatos positivos também ajudam tanto quanto relatos de bug — eles mostram quais combinações de aparelho, update e driver funcionam bem. [Como coletar e revisar o diagnóstico](docs/DIAGNOSTICOS.md) · [Registrar um problema ou resultado](https://github.com/sinxzinho97/N-Plus-Recomp/issues/new/choose)
+1. Na aba **Criar**, selecione o jogo base, eventuais updates/DLCs, seu arquivo `prod.keys` (e firmware quando necessário) e a pasta de destino.
+2. Clique em **Criar** para gerar o APK do jogo usando a versão escolhida.
+3. Para atualizar um jogo já criado no aparelho para o motor e menu mais recentes mantendo dados e assinatura, use a aba **Atualizar**.
+4. Dentro do jogo, importe **mods** ou **drivers de vídeo** em arquivo fechado **`.zip` ou `.rar`**; ao concluir, confirme se deseja ativar na hora.
 
 ## Créditos
 
-O **N+ Recomp** é desenvolvido e mantido por **sinxzinho97**. Este trabalho se apoia na base Android do projeto **nx2android**, criado por **shirai91 (Tung Pham)**. O driver Vulkan opcional deriva do **Mesa Turnip**, desenvolvido pela comunidade **Mesa/Freedreno**. [nx2android](https://github.com/shirai91/nx2android) · [Créditos, licenças e fontes dos componentes](CREDITOS.md)
+- Criação e manutenção do N+ Recomp: **sinxzinho97** ([github.com/sinxzinho97](https://github.com/sinxzinho97))
+- Base de compatibilidade e integração Android: **nx2android**, por **shirai91** ([github.com/shirai91/nx2android](https://github.com/shirai91/nx2android))

@@ -1,0 +1,12 @@
+N+ Turnip V8 (Mesa 26.3.0 / Android ARM64 / Adreno 6xx, 7xx e 8xx)
+
+Novidade do V8 (sobre a base completa do V7.5):
+- Elimina o encerramento abrupto (exit(1)) dentro do compilador de shaders ir3 quando um compute shader com barreira de workgroup exige mais waves concorrentes do que o limite do hardware/branchstack/shared memory permite (por exemplo, na Adreno 830 sem double_threadsize em jogos da RE Engine como Monster Hunter Rise).
+- Em vez de matar o processo do jogo com exit(1), o Turnip V8 registra o erro no log e devolve VK_ERROR_UNKNOWN de forma limpa na criação da pipeline daquele compute shader específico, deixando o host do N+ Recomp recusar apenas o shader problemático e continuar rodando.
+- Sem impacto em nenhum outro jogo ou shader que já funciona: o código só é acionado na condição exata em que o driver antes chamava exit(1).
+
+Mantém todas as correções do V7.5:
+- Offsets de LRZ fast-clear corretos para A8XX em sysmem BR (fd_lrzfc_layout<CHIP>).
+- Reset completo de GRAS_LRZ_CNTL após FD_LRZ_FLUSH em clear/disable no A8XX.
+- has_fs_tex_prefetch = False unificado em a8xx_base.
+- ThinLTO, IMapper5/UBWC universal, alinhamento de 16 KiB e suporte a Android API 29+.
